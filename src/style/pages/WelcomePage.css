@@ -462,8 +462,8 @@
 
 html, body {
     scroll-behavior: smooth;
-    scrollbar-width: thin;         /* Firefox */
-    scrollbar-color: #5c6bc0 #e0e0e0;  /* Firefox */
+    scrollbar-width: thin;
+    scrollbar-color: #5c6bc0 #e0e0e0;
     margin: 0;
     padding: 0;
     overflow-x: hidden;

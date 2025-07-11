@@ -93,6 +93,7 @@ const protectedRoutes = [
     path: "/profile/search/:username",
     element: <Profile />,
   },
+
   {
     path: "/settings",
     element: <div>Settings Page - Coming Soon</div>,

@@ -43,25 +43,28 @@ function Header({ userName, handleLogout }) {
           <Link to="/games" className="nav-link">Trò chơi</Link>
           <Link to="/leaderboard" className="nav-link">Bảng xếp hạng</Link>
 
-          <div className="user-menu">
-            <button
-              className="user-button"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              <div className="avatar">{userInitial}</div>
-            </button>
+          <div className="header-actions">
 
-            <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
-              <button className="dropdown-item" onClick={handleProfileClick}>
-                <FiUser /> Hồ sơ cá nhân
+            <div className="user-menu">
+              <button
+                className="user-button"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                <div className="avatar">{userInitial}</div>
               </button>
-              <button className="dropdown-item" onClick={() => navigate('/settings')}>
-                <FiSettings /> Cài đặt
-              </button>
-              <div className="dropdown-divider"></div>
-              <button className="dropdown-item logout" onClick={handleLogout}>
-                <FiLogOut /> Đăng xuất
-              </button>
+
+              <div className={`dropdown-menu ${isMenuOpen ? 'open' : ''}`}>
+                <button className="dropdown-item" onClick={handleProfileClick}>
+                  <FiUser /> Hồ sơ cá nhân
+                </button>
+                <button className="dropdown-item" onClick={() => navigate('/settings')}>
+                  <FiSettings /> Cài đặt
+                </button>
+                <div className="dropdown-divider"></div>
+                <button className="dropdown-item logout" onClick={handleLogout}>
+                  <FiLogOut /> Đăng xuất
+                </button>
+              </div>
             </div>
           </div>
         </nav>

@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 
-const useUIStore = create((set) => ({
+const useUIStore = create((set, get) => ({
   // UI state
   darkMode: localStorage.getItem('darkMode') === 'true',
   notifications: [],
   isMenuOpen: false,
+  isCreateRoomModalOpen: false,
   
   // UI actions
   toggleDarkMode: () => {
@@ -26,7 +27,17 @@ const useUIStore = create((set) => ({
   
   toggleMenu: () => set(state => ({ isMenuOpen: !state.isMenuOpen })),
   
-  closeMenu: () => set({ isMenuOpen: false })
+  closeMenu: () => set({ isMenuOpen: false }),
+  
+  // Create Room Modal
+  openCreateRoomModal: () => {
+    console.log('Setting isCreateRoomModalOpen to true');
+    set({ isCreateRoomModalOpen: true });
+  },
+  closeCreateRoomModal: () => {
+    console.log('Setting isCreateRoomModalOpen to false');
+    set({ isCreateRoomModalOpen: false });
+  }
 }));
 
 export default useUIStore;

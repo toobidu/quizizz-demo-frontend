@@ -9,20 +9,34 @@ class SocketService {
   connect(token) {
     if (this.socket) return;
     
-    this.socket = io('http://localhost:8080', {
-      auth: { token },
-      transports: ['websocket']
-    });
+    try {
+      this.socket = io('http://localhost:3001', {
+        auth: { token },
+        transports: ['websocket'],
+        reconnectionAttempts: 3,
+        timeout: 5000
+      });
 
-    this.socket.on('connect', () => {
-      this.isConnected = true;
-      console.log('Socket connected');
-    });
+      this.socket.on('connect', () => {
+        this.isConnected = true;
+        console.log('Socket connected');
+      });
 
-    this.socket.on('disconnect', () => {
-      this.isConnected = false;
-      console.log('Socket disconnected');
-    });
+      this.socket.on('connect_error', (err) => {
+        console.warn('Socket connection error:', err.message);
+        // Tạm thời tắt socket nếu không thể kết nối sau 3 lần thử
+        if (this.socket) {
+          this.socket.disconnect();
+        }
+      });
+
+      this.socket.on('disconnect', () => {
+        this.isConnected = false;
+        console.log('Socket disconnected');
+      });
+    } catch (error) {
+      console.error('Failed to initialize socket:', error);
+    }
   }
 
   disconnect() {

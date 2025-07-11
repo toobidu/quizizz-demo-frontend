@@ -4,18 +4,28 @@ import Header from '../layouts/Header';
 import Footer from '../layouts/Footer';
 import profileApi from '../config/api/profile.api';
 import authApi from '../config/api/auth.api';
-import { FiUser, FiUsers, FiTarget, FiCalendar, FiLoader } from 'react-icons/fi';
+import { FiUser, FiUsers, FiTarget, FiCalendar, FiLoader, FiEdit, FiSave, FiX } from 'react-icons/fi';
 import '../style/pages/Profile.css';
+import { FaRunning } from 'react-icons/fa';
 
 function Profile() {
     const { username } = useParams();
     const navigate = useNavigate();
     const currentUser = localStorage.getItem('username');
+    const token = localStorage.getItem('accessToken');
     const isOwnProfile = !username || username === currentUser;
 
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isEditing, setIsEditing] = useState(false);
+    const [formData, setFormData] = useState({
+        fullName: '',
+        phoneNumber: '',
+        address: ''
+    });
+    const [updateLoading, setUpdateLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -28,15 +38,19 @@ function Profile() {
                 } else {
                     data = await profileApi.searchUser(username);
                 }
-
-                if (data.success) {
-                    setProfileData(data.data);
+                
+                if (data.Status === 200) {
+                    setProfileData(data.Data);
+                    setFormData({
+                        fullName: data.Data.FullName || '',
+                        phoneNumber: data.Data.PhoneNumber || '',
+                        address: data.Data.Address || ''
+                    });
                 } else {
-                    setError(data.message || 'Không thể tải thông tin profile');
+                    setError(data.Message || 'Không thể tải thông tin profile');
                 }
             } catch (err) {
-                setError('Lỗi kết nối đến server');
-                console.error('Profile fetch error:', err);
+                setError(err.message || 'Lỗi kết nối đến server');
             } finally {
                 setLoading(false);
             }
@@ -49,6 +63,41 @@ function Profile() {
         await authApi.logout();
         localStorage.removeItem('username');
         navigate('/');
+    };
+    
+    const handleUpdateProfile = async () => {
+        try {
+            setUpdateLoading(true);
+            
+            const updateData = {
+                FullName: formData.fullName,
+                PhoneNumber: formData.phoneNumber,
+                Address: formData.address,
+                Email: profileData.Email
+            };
+            
+            const result = await profileApi.updateProfile(updateData);
+            
+            if (result.Status === 200) {
+                setProfileData(prev => ({
+                    ...prev,
+                    FullName: formData.fullName,
+                    PhoneNumber: formData.phoneNumber,
+                    Address: formData.address
+                }));
+                
+                setIsEditing(false);
+                setSuccessMessage('Cập nhật thông tin thành công!');
+                setTimeout(() => setSuccessMessage(''), 3000);
+            } else {
+                alert(`Lỗi: ${result.Message || 'Không thể cập nhật thông tin'}`);
+            }
+        } catch (error) {
+            console.error('Update profile error:', error);
+            alert(`Lỗi: ${error.message || 'Không thể cập nhật thông tin'}`);
+        } finally {
+            setUpdateLoading(false);
+        }
     };
 
     if (loading) {
@@ -84,38 +133,119 @@ function Profile() {
             <Header userName={currentUser} handleLogout={handleLogout} />
 
             <main className="profile-content">
+                {successMessage && (
+                    <div className="success-toast">
+                        <span>{successMessage}</span>
+                    </div>
+                )}
                 <div className="profile-header">
                     <div className="profile-avatar">
-                        {profileData?.username?.charAt(0).toUpperCase() || 'U'}
+                        {profileData?.Username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div className="profile-info">
-                        <h1>{profileData?.username || 'Unknown User'}</h1>
-                        <p className="join-date">
-                            <FiCalendar /> Tham gia từ {profileData?.joinDate ? new Date(profileData.joinDate).toLocaleDateString('vi-VN') : 'N/A'}
-                        </p>
+                        <div className="profile-title">
+                            <h1>{profileData?.Username || 'Unknown User'}</h1>
+                            <div className="profile-actions">
+                                {isOwnProfile && !isEditing ? (
+                                    <button className="edit-profile-btn" onClick={() => setIsEditing(true)}>
+                                        <FiEdit className="btn-icon" /> Cập nhật thông tin
+                                    </button>
+                                ) : (isOwnProfile && isEditing ? (
+                                    <div className="edit-actions">
+                                        <button 
+                                            className="save-btn" 
+                                            onClick={handleUpdateProfile} 
+                                            disabled={updateLoading}
+                                        >
+                                            {updateLoading ? <FiLoader className="spin" /> : <FiSave />} Lưu
+                                        </button>
+                                        <button 
+                                            className="cancel-btn" 
+                                            onClick={() => setIsEditing(false)}
+                                            disabled={updateLoading}
+                                        >
+                                            <FiX /> Hủy
+                                        </button>
+                                    </div>
+                                ) : null
+                                )}
+                            </div>
+                        </div>
+                        <div className="info-grid">
+                            <div className="info-item">
+                                <p className="info-label">Họ tên:</p>
+                                {isOwnProfile && isEditing ? (
+                                    <input 
+                                        type="text" 
+                                        className="edit-input" 
+                                        value={formData.fullName} 
+                                        onChange={(e) => setFormData({...formData, fullName: e.target.value})}
+                                        placeholder="Nhập họ tên"
+                                    />
+                                ) : (
+                                    <p className="info-value">{profileData?.FullName && profileData.FullName.trim() !== '' ? profileData.FullName : 'Chưa cập nhật'}</p>
+                                )}
+                            </div>
+                            <div className="info-item">
+                                <p className="info-label">Email:</p>
+                                <p className="info-value">{profileData?.Email || 'Chưa cập nhật'}</p>
+                            </div>
+                            <div className="info-item">
+                                <p className="info-label">Số điện thoại:</p>
+                                {isOwnProfile && isEditing ? (
+                                    <input 
+                                        type="text" 
+                                        className="edit-input" 
+                                        value={formData.phoneNumber} 
+                                        onChange={(e) => setFormData({...formData, phoneNumber: e.target.value})}
+                                        placeholder="Nhập số điện thoại"
+                                    />
+                                ) : (
+                                    <p className="info-value">{profileData?.PhoneNumber && profileData.PhoneNumber.trim() !== '' ? profileData.PhoneNumber : 'Chưa cập nhật'}</p>
+                                )}
+                            </div>
+                            <div className="info-item">
+                                <p className="info-label">Địa chỉ:</p>
+                                {isOwnProfile && isEditing ? (
+                                    <input 
+                                        type="text" 
+                                        className="edit-input" 
+                                        value={formData.address} 
+                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                        placeholder="Nhập địa chỉ"
+                                    />
+                                ) : (
+                                    <p className="info-value">{profileData?.Address || 'Chưa cập nhật'}</p>
+                                )}
+                            </div>
+                            <div className="info-item">
+                                <p className="info-label">Tham gia từ:</p>
+                                <p className="info-value"><FiCalendar className="icon" /> {profileData?.CreatedAt ? new Date(profileData.CreatedAt).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN')}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div className="profile-stats">
                     <div className="stat-card">
                         <FiTarget className="stat-icon" />
-                        <div className="stat-value">{profileData?.gamesPlayed || 0}</div>
-                        <div className="stat-label">Trò chơi đã chơi</div>
-                    </div>
-                    <div className="stat-card">
-                        <FiUsers className="stat-icon" />
-                        <div className="stat-value">{profileData?.highScore?.toLocaleString() || 0}</div>
+                        <div className="stat-value">{profileData?.HighestScore?.toLocaleString() || 0}</div>
                         <div className="stat-label">Điểm cao nhất</div>
                     </div>
                     <div className="stat-card">
-                        <FiUser className="stat-icon" />
-                        <div className="stat-value">#{profileData?.rank || 'N/A'}</div>
-                        <div className="stat-label">Xếp hạng</div>
+                        <FiUsers className="stat-icon" />
+                        <div className="stat-value">#{profileData?.HighestRank || 'N/A'}</div>
+                        <div className="stat-label">Xếp hạng cao nhất</div>
                     </div>
                     <div className="stat-card">
-                        <FiTrophy className="stat-icon" />
-                        <div className="stat-value">{profileData?.medals || 0}</div>
-                        <div className="stat-label">Huy chương</div>
+                        <FiUser className="stat-icon" />
+                        <div className="stat-value">{profileData?.FastestTime || 'N/A'}</div>
+                        <div className="stat-label">Thời gian nhanh nhất</div>
+                    </div>
+                    <div className="stat-card">
+                        <FaRunning className="stat-icon" />
+                        <div className="stat-value">{profileData?.BestTopic || 'N/A'}</div>
+                        <div className="stat-label">Chủ đề tốt nhất</div>
                     </div>
                 </div>
 
