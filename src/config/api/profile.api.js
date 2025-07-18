@@ -16,9 +16,9 @@ const profileApi = {
         return { Status: 401, Message: 'Không tìm thấy token đăng nhập' };
       }
       
-      // Thêm token vào header để đảm bảo và thêm timestamp để tránh cache
+      // Gọi API đến endpoint /api/profile/me theo backend
       const timestamp = new Date().getTime();
-      const response = await apiInstance.get(`/profile/me?_=${timestamp}`, {
+      const response = await apiInstance.get(`/profile/me`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -89,8 +89,8 @@ const profileApi = {
       
       console.log('Sending with restructured data:', requestData);
       
-      // Gọi trực tiếp đến URL đầy đủ
-      const response = await axios.put('http://localhost:5000/api/profile/update', requestData, {
+      // Sử dụng apiInstance với endpoint đúng theo backend
+      const response = await apiInstance.put('/profile/update', requestData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

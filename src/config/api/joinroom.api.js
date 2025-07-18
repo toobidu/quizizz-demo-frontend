@@ -4,16 +4,16 @@ const getPublicRooms = async () => {
   return api.get('/rooms/public');
 };
 
-const joinPublicRoom = async (roomId) => {
-  return api.post(`/rooms/${roomId}/join`);
+const joinPublicRoom = async (roomCode) => {
+  return api.post(`/rooms/${roomCode}/join`);
 };
 
 const joinPrivateRoom = async (roomCode) => {
-  return api.post('/rooms/join-private', { roomCode });
+  return api.post(`/rooms/${roomCode}/join`);
 };
 
-const leaveRoom = async (roomId) => {
-  return api.delete(`/rooms/${roomId}/leave`);
+const leaveRoom = async (roomCode) => {
+  return api.post(`/rooms/${roomCode}/leave`);
 };
 
 const getRoomByCode = async (roomCode) => {

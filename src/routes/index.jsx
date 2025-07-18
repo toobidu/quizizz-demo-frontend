@@ -8,7 +8,10 @@ import VerifyOTP from "../pages/auth/VerifyOTP";
 import NewPassword from "../pages/auth/NewPassword";
 import MainPage from "../pages/MainPage";
 import Profile from "../pages/Profile";
+import RoomsPage from "../pages/RoomsPage";
+import WaitingRoom from "../pages/WaitingRoom";
 import ProtectedRoute from "./ProtectedRoute";
+import ModalContainer from "../layouts/ModalContainer";
 
 // Layout components
 const AuthLayout = ({ children }) => (
@@ -20,6 +23,7 @@ const AuthLayout = ({ children }) => (
 const MainLayout = ({ children }) => (
   <div className="main-layout">
     {children}
+    <ModalContainer />
   </div>
 );
 
@@ -83,7 +87,15 @@ const publicRoutes = [
 const protectedRoutes = [
   {
     path: "/dashboard",
-    element: <MainPage />,
+    element: (
+      <MainLayout>
+        <MainPage />
+      </MainLayout>
+    ),
+  },
+  {
+    path: "/rooms",
+    element: <RoomsPage />,
   },
   {
     path: "/profile",
@@ -105,6 +117,10 @@ const protectedRoutes = [
   {
     path: "/leaderboard",
     element: <div>Leaderboard Page - Coming Soon</div>,
+  },
+  {
+    path: "/waiting-room/:roomCode",
+    element: <WaitingRoom />,
   },
 ];
 

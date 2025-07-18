@@ -10,8 +10,11 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path
-      },
-    },
+        rewrite: (path) => path.replace(/^\/api/, '/api')
+      }
+    }
   },
+  define: {
+    'process.env.VITE_API_URL': JSON.stringify('http://localhost:5000')
+  }
 });

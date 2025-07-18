@@ -1,17 +1,24 @@
 import axios from "axios";
 import Cookies from 'js-cookie';
+import { API_CONFIG } from '../../constants/api';
 
+/**
+ * Axios instance with default configuration
+ * Handles authentication headers and request/response interceptors
+ */
 const apiInstance = axios.create({
-    baseURL: '/api', // Sẽ proxy qua Vite tới BE: http://localhost:5000
-    timeout: 10000,
+    baseURL: API_CONFIG.BASE_URL,
+    timeout: API_CONFIG.TIMEOUT,
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: false // không cần cookie tự động nếu dùng js-cookie thủ công
+    withCredentials: false
 });
 
+
+
 apiInstance.interceptors.request.use((config) => {
-    const token = Cookies.get('accessToken');
+    const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }

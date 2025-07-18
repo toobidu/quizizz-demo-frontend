@@ -19,9 +19,9 @@ function HeroSection({ userName, stats }) {
                     <div className="mp-hero-actions">
                         <button 
                             className="mp-hero-button primary" 
-                            onClick={() => setShowChallengeModal(true)}
+                            onClick={() => navigate('/rooms')}
                         >
-                            <FiZap /> Bắt đầu thử thách
+                            <FiZap /> Bắt đầu ngay
                         </button>
                         <button 
                             className="mp-hero-button secondary" 

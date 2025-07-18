@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import profileApi from '../config/api/profile.api';
 import authApi from '../config/api/auth.api';
-import socketService from '../services/socket';
+import websocketService from '../services/websocketService';
 
 const useUserStore = create((set, get) => ({
   // User data
@@ -25,7 +25,7 @@ const useUserStore = create((set, get) => ({
       console.log('Token in useUserStore:', token ? 'Token exists' : 'No token');
       
       if (token) {
-        socketService.connect(token);
+        websocketService.connect();
       } else {
         console.warn('No accessToken found in localStorage');
       }
@@ -35,16 +35,17 @@ const useUserStore = create((set, get) => ({
       console.log('Profile data received:', profileData);
       
       console.log('UserStore - Full profile data:', profileData);
-      // API trả về Status 200 thay vì success
-      if (profileData.Status === 200) {
-        console.log('UserStore - Profile data details:', profileData.Data);
+      // API có thể trả về Status 200 hoặc status 200
+      if (profileData.Status === 200 || profileData.status === 200) {
+        const userData = profileData.Data || profileData.data;
+        console.log('UserStore - Profile data details:', userData);
         set({
-          userName: profileData.Data?.Username || 'User',
+          userName: userData?.Username || userData?.username || 'User',
           stats: {
-            highScore: profileData.Data?.HighestScore || 0,
-            rank: profileData.Data?.HighestRank || 'N/A',
-            fastestTime: profileData.Data?.FastestTime || 'N/A',
-            bestTopic: profileData.Data?.BestTopic || 'N/A'
+            highScore: userData?.Stats?.TotalPoints || userData?.stats?.totalPoints || 0,
+            rank: userData?.Stats?.Rank || userData?.stats?.rank || 'N/A',
+            fastestTime: userData?.Stats?.FastestTime || userData?.stats?.fastestTime || 'N/A',
+            bestTopic: userData?.Stats?.BestTopic || userData?.stats?.bestTopic || 'N/A'
           },
           loading: false
         });
@@ -61,7 +62,7 @@ const useUserStore = create((set, get) => ({
   },
   
   logout: async (navigate) => {
-    socketService.disconnect();
+    websocketService.disconnect();
     await authApi.logout();
     localStorage.removeItem('username');
     set({ 

@@ -2,7 +2,9 @@ import api from './apiInstance';
 import Cookies from 'js-cookie';
 
 const login = async (payload) => {
+    console.log('Login with payload:', payload);
     const res = await api.post('/auth/login', payload);
+    console.log('Login response:', res.data);
     const accessToken = res.data.Data?.AccessToken;
     const refreshToken = res.data.Data?.RefreshToken;
 
@@ -31,7 +33,12 @@ const logout = async () => {
     const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
     if (!token) return;
 
-    await api.post('/auth/logout', { token });
+    try {
+        await api.post('/auth/logout', { token });
+        console.log('Logout successful');
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
 
     // Clear from both localStorage and cookies
     localStorage.removeItem('accessToken');

@@ -1,0 +1,346 @@
+.wr-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: white;
+}
+
+.wr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.wr-header h1 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+.wr-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 15px;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.wr-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.wr-info-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.wr-room-code {
+  margin-bottom: 20px;
+}
+
+.wr-room-code span {
+  font-size: 1.1rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.wr-code-display {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.wr-code-display strong {
+  font-size: 2rem;
+  letter-spacing: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+.wr-copy-btn {
+  position: relative;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wr-copy-btn:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+}
+
+.wr-copied {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.wr-game-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.wr-info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+}
+
+.wr-players-section h3 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.wr-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+  max-width: 500px;
+  margin: 0 auto 20px;
+}
+
+.wr-slot {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 25px 20px;
+  text-align: center;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wr-slot.wr-filled {
+  border-color: #4CAF50;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.wr-slot.wr-empty {
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.wr-slot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.wr-slot.wr-empty:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.wr-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.wr-player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wr-avatar {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+}
+
+.wr-username {
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.wr-empty-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.wr-plus-icon {
+  font-size: 3.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 8px;
+  transition: all 0.3s ease;
+}
+
+.wr-slot.wr-empty:hover .wr-plus-icon {
+  color: rgba(255, 255, 255, 0.7);
+  transform: scale(1.1);
+}
+
+.wr-empty-text {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+}
+
+.wr-room-full {
+  text-align: center;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 15px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border: 2px solid rgba(76, 175, 80, 0.5);
+  color: #e8f5e8;
+}
+
+.wr-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.wr-start-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 250px;
+  justify-content: center;
+}
+
+.wr-start-btn.wr-enabled {
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+}
+
+.wr-start-btn.wr-enabled:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.wr-start-btn.wr-disabled {
+  background: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+}
+
+.wr-waiting-message {
+  background: rgba(255, 193, 7, 0.3);
+  padding: 15px 30px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.wr-leave-btn {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 10px 25px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.wr-leave-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.wr-loading, .wr-error {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  margin: 20px;
+}
+
+.wr-error {
+  background: rgba(244, 67, 54, 0.2);
+  border: 1px solid rgba(244, 67, 54, 0.5);
+}
+
+.wr-host-badge {
+  background: linear-gradient(45deg, #FFD700, #FFA500);
+  color: #333;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+  .wr-container {
+    padding: 15px;
+  }
+  
+  .wr-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .wr-slots-grid {
+    grid-template-columns: 1fr;
+    max-width: 300px;
+  }
+  
+  .wr-slot {
+    min-height: 120px;
+    padding: 20px 15px;
+  }
+  
+  .wr-plus-icon {
+    font-size: 3rem;
+  }
+  
+  .wr-game-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .wr-code-display {
+    flex-direction: column;
+    gap: 10px;
+  }
+}

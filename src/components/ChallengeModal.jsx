@@ -17,7 +17,7 @@ function ChallengeModal({ isOpen, onClose }) {
   };
 
   const handleJoinRoom = () => {
-    navigate('/join-room');
+    navigate('/rooms');
     onClose();
   };
 

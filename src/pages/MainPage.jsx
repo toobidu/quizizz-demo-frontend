@@ -15,7 +15,7 @@ function MainPage() {
     useEffect(() => {
         fetchUserProfile();
 
-        // Không cần return cleanup vì socketService.disconnect()
+        // Không cần return cleanup vì websocketService.disconnect()
         // sẽ được xử lý trong logout action
     }, [fetchUserProfile]);
 

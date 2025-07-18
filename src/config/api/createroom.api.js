@@ -1,31 +1,92 @@
 import api from './apiInstance';
+import Cookies from 'js-cookie';
 
 const createRoom = async (payload) => {
-  return api.post('/rooms/create', payload);
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  console.log('CreateRoom API - Payload gửi:', JSON.stringify(payload, null, 2));
+  
+  try {
+    const response = await api.post('/rooms/create', payload, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    console.log('CreateRoom API - Response:', response.data);
+    return response.data; // Trả về response.data thay vì response
+  } catch (error) {
+    console.error('CreateRoom API - Error:', error.response?.data || error.message);
+    throw error;
+  }
+};
+
+const getMyCurrentRoom = async () => {
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.get('/rooms/my-current', {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+};
+
+const joinRoom = async (roomId) => {
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.post(`/rooms/${roomId}/join`, {}, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 const updateRoomSettings = async (roomId, settings) => {
-  return api.put(`/rooms/${roomId}/settings`, settings);
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.put(`/rooms/${roomId}/settings`, settings, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 const kickPlayer = async (roomId, playerId) => {
-  return api.delete(`/rooms/${roomId}/players/${playerId}`);
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.delete(`/rooms/${roomId}/players/${playerId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 const updateRoomStatus = async (roomId, status) => {
-  return api.put(`/rooms/${roomId}/status`, { status });
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.put(`/rooms/${roomId}/status`, { status }, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 const deleteRoom = async (roomId) => {
-  return api.delete(`/rooms/${roomId}`);
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.delete(`/rooms/${roomId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 const transferOwnership = async (roomId, newOwnerId) => {
-  return api.put(`/rooms/${roomId}/transfer`, { newOwnerId });
+  const token = localStorage.getItem('accessToken') || Cookies.get('accessToken');
+  return api.put(`/rooms/${roomId}/transfer`, { newOwnerId }, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
 };
 
 export default {
   createRoom,
+  getMyCurrentRoom,
+  joinRoom,
   updateRoomSettings,
   kickPlayer,
   updateRoomStatus,

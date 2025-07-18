@@ -58,7 +58,7 @@ function WelcomePage() {
                 <div className="wp-features-grid">
                     <div className="wp-feature-card">
                         <div className="wp-feature-icon-wrapper">
-                            <div className="wp-feature-icon">🧠</div>
+                            <div className="wp-feature-icon"></div>
                         </div>
                         <h3 className="wp-feature-title">Rèn luyện trí não</h3>
                         <p className="wp-feature-text">
@@ -67,7 +67,7 @@ function WelcomePage() {
                     </div>
                     <div className="wp-feature-card">
                         <div className="wp-feature-icon-wrapper">
-                            <div className="wp-feature-icon">📊</div>
+                            <div className="wp-feature-icon"></div>
                         </div>
                         <h3 className="wp-feature-title">Theo dõi tiến độ</h3>
                         <p className="wp-feature-text">
@@ -76,7 +76,7 @@ function WelcomePage() {
                     </div>
                     <div className="wp-feature-card">
                         <div className="wp-feature-icon-wrapper">
-                            <div className="wp-feature-icon">🎮</div>
+                            <div className="wp-feature-icon"></div>
                         </div>
                         <h3 className="wp-feature-title">Đa dạng thử thách</h3>
                         <p className="wp-feature-text">
