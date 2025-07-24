@@ -463,15 +463,6 @@ const WaitingRoom = ({ roomId }) => {
       }, 3000);
     }
 
-    // Kiểm tra trạng thái sẵn sàng của người dùng hiện tại - Không cần nữa vì mặc định ready
-    // if (currentUserId) {
-    //   const currentPlayer = mappedPlayers.find(p =>
-    //     p.userId === parseInt(currentUserId) || p.userId?.toString() === currentUserId
-    //   );
-    //   if (currentPlayer && currentPlayer.isReady !== isReady) {
-    //     setIsReady(currentPlayer.isReady || false);
-    //   }
-    // }
   }, [players, actualRoomCode, joinRoomWS]);
 
   const handleHostChange = React.useCallback((isHostOrId) => {

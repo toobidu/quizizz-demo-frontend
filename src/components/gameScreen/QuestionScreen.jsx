@@ -58,55 +58,56 @@ const QuestionScreen = ({question, questionIndex, totalQuestions, timeRemaining,
 
     // Nếu không có câu hỏi, hiển thị màn hình loading
     if (!question) {
-        return (<div className="question-loading">
+        return (<div className="qs-question-loading">
             <h3>Đang tải câu hỏi...</h3>
         </div>);
     }
 
     // Tính phần trăm thời gian còn lại
     const timePercentage = (timeRemaining / 30) * 100; // Giả sử mỗi câu hỏi có 30 giây
+    const isTimeWarning = timeRemaining <= 10; // Cảnh báo khi còn 10 giây
 
-    return (<div className="question-screen">
-        <div className="question-header">
-            <div className="question-progress">
+    return (<div className="qs-question-screen">
+        <div className="qs-question-header">
+            <div className="qs-question-progress">
                 Câu hỏi {questionIndex + 1}/{totalQuestions}
             </div>
-            <div className="question-timer">
-                <div className="timer-bar-container">
+            <div className="qs-question-timer">
+                <div className="qs-timer-bar-container">
                     <div
-                        className="timer-bar"
+                        className={`qs-timer-bar ${isTimeWarning ? 'qs-warning' : ''}`}
                         style={{width: `${timePercentage}%`}}
                     ></div>
                 </div>
-                <div className="timer-value">{timeRemaining}s</div>
+                <div className="qs-timer-value">{timeRemaining}s</div>
             </div>
         </div>
 
-        <div className="question-content">
-            <h2 className="question-text">{question.question}</h2>
+        <div className="qs-question-content">
+            <h2 className="qs-question-text">{question.question}</h2>
 
-            <div className="options-container">
+            <div className="qs-options-container">
                 {question.options.map((option, index) => (<div
                     key={index}
-                    className={`option-item ${selectedOption === option.id ? 'selected' : ''}`}
+                    className={`qs-option-item ${selectedOption === option.id ? 'qs-selected' : ''}`}
                     onClick={() => handleOptionSelect(option.id)}
                 >
-                    <div className="option-letter">{String.fromCharCode(65 + index)}</div>
-                    <div className="option-text">{option.text}</div>
+                    <div className="qs-option-letter">{String.fromCharCode(65 + index)}</div>
+                    <div className="qs-option-text">{option.text}</div>
                 </div>))}
             </div>
         </div>
 
-        <div className="question-footer">
+        <div className="qs-question-footer">
             <button
-                className={`submit-button ${selectedOption && !isAnswerSubmitted ? 'active' : 'disabled'}`}
+                className={`qs-submit-button ${selectedOption && !isAnswerSubmitted ? 'qs-active' : 'qs-disabled'}`}
                 onClick={handleSubmitAnswer}
                 disabled={!selectedOption || isAnswerSubmitted}
             >
                 {isAnswerSubmitted ? 'Đã gửi câu trả lời' : 'Gửi câu trả lời'}
             </button>
 
-            {isAnswerSubmitted && (<div className="answer-submitted">
+            {isAnswerSubmitted && (<div className="qs-answer-submitted">
                 Đã gửi câu trả lời! Đang chờ kết quả...
             </div>)}
         </div>
