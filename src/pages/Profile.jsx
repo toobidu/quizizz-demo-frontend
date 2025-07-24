@@ -19,6 +19,23 @@ function Profile() {
     // Sử dụng hook để đặt title cho trang profile
     useDocumentTitle(isOwnProfile ? 'Hồ sơ của tôi' : `Hồ sơ của ${username}`);
 
+    // Helper function để format date an toàn
+    const formatDate = (dateString) => {
+        if (!dateString) return 'Chưa cập nhật';
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return 'Chưa cập nhật';
+            return date.toLocaleDateString('vi-VN');
+        } catch (error) {
+            return 'Chưa cập nhật';
+        }
+    };
+
+    // Helper function để lấy giá trị field an toàn
+    const getFieldValue = (data, fieldName) => {
+        return data?.[fieldName] || '';
+    };
+
     const [profileData, setProfileData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -46,9 +63,9 @@ function Profile() {
                 if (data.status === 200) {
                     setProfileData(data.data);
                     setFormData({
-                        fullName: data.data.FullName || '',
-                        phoneNumber: data.data.PhoneNumber || '',
-                        address: data.data.Address || ''
+                        fullName: getFieldValue(data.data, 'fullName'),
+                        phoneNumber: getFieldValue(data.data, 'phoneNumber'),
+                        address: getFieldValue(data.data, 'address')
                     });
                 } else {
                     setError(data.message || 'Không thể tải thông tin profile');
@@ -74,10 +91,10 @@ function Profile() {
             setUpdateLoading(true);
 
             const updateData = {
-                FullName: formData.fullName,
-                PhoneNumber: formData.phoneNumber,
-                Address: formData.address,
-                Email: profileData.Email
+                fullName: formData.fullName,
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                email: getFieldValue(profileData, 'email')
             };
 
             const result = await profileApi.updateProfile(updateData);
@@ -85,9 +102,9 @@ function Profile() {
             if (result.status === 200) {
                 setProfileData(prev => ({
                     ...prev,
-                    FullName: formData.fullName,
-                    PhoneNumber: formData.phoneNumber,
-                    Address: formData.address
+                    fullName: formData.fullName,
+                    phoneNumber: formData.phoneNumber,
+                    address: formData.address
                 }));
 
                 setIsEditing(false);
@@ -187,12 +204,16 @@ function Profile() {
                                         placeholder="Nhập họ tên"
                                     />
                                 ) : (
-                                    <p className="pf-info-value">{profileData?.FullName && profileData.FullName.trim() !== '' ? profileData.FullName : 'Chưa cập nhật'}</p>
+                                    <p className="pf-info-value">{
+                                        getFieldValue(profileData, 'fullName').trim() !== '' 
+                                            ? getFieldValue(profileData, 'fullName')
+                                            : 'Chưa cập nhật'
+                                    }</p>
                                 )}
                             </div>
                             <div className="pf-info-item">
                                 <p className="pf-info-label">Email:</p>
-                                <p className="pf-info-value">{profileData?.Email || 'Chưa cập nhật'}</p>
+                                <p className="pf-info-value">{getFieldValue(profileData, 'email') || 'Chưa cập nhật'}</p>
                             </div>
                             <div className="pf-info-item">
                                 <p className="pf-info-label">Số điện thoại:</p>
@@ -205,7 +226,11 @@ function Profile() {
                                         placeholder="Nhập số điện thoại"
                                     />
                                 ) : (
-                                    <p className="pf-info-value">{profileData?.PhoneNumber && profileData.PhoneNumber.trim() !== '' ? profileData.PhoneNumber : 'Chưa cập nhật'}</p>
+                                    <p className="pf-info-value">{
+                                        getFieldValue(profileData, 'phoneNumber').trim() !== '' 
+                                            ? getFieldValue(profileData, 'phoneNumber')
+                                            : 'Chưa cập nhật'
+                                    }</p>
                                 )}
                             </div>
                             <div className="pf-info-item">
@@ -219,12 +244,19 @@ function Profile() {
                                         placeholder="Nhập địa chỉ"
                                     />
                                 ) : (
-                                    <p className="pf-info-value">{profileData?.Address || 'Chưa cập nhật'}</p>
+                                    <p className="pf-info-value">{
+                                        getFieldValue(profileData, 'address').trim() !== '' 
+                                            ? getFieldValue(profileData, 'address')
+                                            : 'Chưa cập nhật'
+                                    }</p>
                                 )}
                             </div>
                             <div className="pf-info-item">
                                 <p className="pf-info-label">Tham gia từ:</p>
-                                <p className="pf-info-value"><FiCalendar className="pf-icon" /> {profileData?.CreatedAt ? new Date(profileData.CreatedAt).toLocaleDateString('vi-VN') : new Date().toLocaleDateString('vi-VN')}</p>
+                                <p className="pf-info-value">
+                                    <FiCalendar className="pf-icon" /> 
+                                    {formatDate(getFieldValue(profileData, 'createdAt'))}
+                                </p>
                             </div>
                         </div>
                     </div>

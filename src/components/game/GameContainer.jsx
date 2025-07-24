@@ -214,24 +214,38 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
 
     // Start game (host only)
     const handleStartGame = useCallback(async () => {
-        if (!isHost) return;
+        console.log('🎮 [GAME_CONTAINER] === START GAME BUTTON CLICKED ===');
+        console.log('🎮 [GAME_CONTAINER] Timestamp:', new Date().toISOString());
+        console.log('🎮 [GAME_CONTAINER] Is host:', isHost);
+        console.log('🎮 [GAME_CONTAINER] Room code:', roomCode);
+        console.log('🎮 [GAME_CONTAINER] Current game state:', gameState);
+        
+        if (!isHost) {
+            console.log('🎮 [GAME_CONTAINER] ❌ User is not host, aborting');
+            return;
+        }
 
         try {
             const userId = localStorage.getItem('userId');
+            console.log('🎮 [GAME_CONTAINER] User ID from localStorage:', userId);
+            
             const options = {
-                selectedTopicIds: [1, 2, 3], // Default topics
+                selectedTopicIds: selectedTopics,
                 questionCount: 10,
                 timeLimit: 30
             };
+            console.log('🎮 [GAME_CONTAINER] Game options:', options);
 
+            console.log('🎮 [GAME_CONTAINER] 📤 Calling gameFlowService.startGameAsHost...');
             await gameFlowService.startGameAsHost(parseInt(userId), options);
             
+            console.log('🎮 [GAME_CONTAINER] ✅ Game start initiated successfully');
             showNotification('Đang bắt đầu game...', 'info');
         } catch (error) {
-            
+            console.log('🎮 [GAME_CONTAINER] ❌ Error starting game:', error);
             showNotification('Lỗi khi bắt đầu game. Vui lòng thử lại!', 'error');
         }
-    }, [isHost]);
+    }, [isHost, roomCode, gameState, selectedTopics]);
 
     // Render different states
     const renderGameContent = () => {

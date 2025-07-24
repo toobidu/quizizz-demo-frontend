@@ -35,6 +35,27 @@ export const WEBSOCKET_EVENTS = {
     PONG: 'PONG',
     ROOM_PLAYERS_UPDATED: 'ROOM_PLAYERS_UPDATED',
     ROOM_CREATED: 'ROOM_CREATED',
+    
+    // Enhanced Game Flow Events
+    GAME_START: 'game-start',
+    NEXT_QUESTION: 'next-question',
+    SUBMIT_ANSWER: 'submit-answer',
+    ANSWER_RESULT: 'answer-result',
+    SCOREBOARD_UPDATE: 'scoreboard-update',
+    GAME_END: 'game-end',
+    
+    // Enhanced Room Management Events
+    PLAYER_JOINED: 'player-joined',
+    PLAYER_LEFT: 'player-left',
+    ROOM_PLAYERS_UPDATE: 'room-players-update',
+    
+    // Backend API Events
+    GAME_STARTED: 'GAME_STARTED',
+    QUESTION_SENT: 'QUESTION_SENT',
+    ANSWER_RESULT_API: 'ANSWER_RESULT',
+    GAME_PROGRESS: 'GAME_PROGRESS',
+    SCOREBOARD_UPDATE_API: 'SCOREBOARD_UPDATE',
+    GAME_FINISHED: 'GAME_FINISHED',
     ROOM_DELETED: 'ROOM_DELETED',
 
     // Legacy events (for backward compatibility)

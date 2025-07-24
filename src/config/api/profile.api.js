@@ -68,13 +68,13 @@ const profileApi = {
                 return {status: 401, message: 'Không tìm thấy token đăng nhập'};
             }
 
-            // Thử với cấu trúc dữ liệu khác
+            // Sử dụng camelCase theo dữ liệu thực tế từ backend
             const requestData = {
                 userId: null, // Backend có thể lấy từ token
-                fullName: profileData.FullName,
-                phoneNumber: profileData.PhoneNumber,
-                address: profileData.Address,
-                email: profileData.Email
+                fullName: profileData.fullName,
+                phoneNumber: profileData.phoneNumber,
+                address: profileData.address,
+                email: profileData.email
             };
 
             // Sử dụng apiInstance với endpoint đúng theo backend

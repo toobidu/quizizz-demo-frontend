@@ -212,15 +212,10 @@ const WebSocketHandler = ({
             };
 
             // Register event listeners
-            websocketService.on('ROOM_PLAYERS_UPDATED', handleRoomPlayersUpdated);
             websocketService.on('room-players-updated', handleRoomPlayersUpdated);
-            websocketService.on('ROOM_JOINED', handleRoomJoined);
             websocketService.on('room-joined', handleRoomJoined);
-            websocketService.on('HOST_CHANGED', handleHostChanged);
             websocketService.on('host-changed', handleHostChanged);
-            websocketService.on('PLAYER_LEFT', handlePlayerLeft);
             websocketService.on('player-left', handlePlayerLeft);
-            websocketService.on('PLAYER_JOINED', handlePlayerJoined);
             websocketService.on('player-joined', handlePlayerJoined);
 
             // Request initial players update with delay
@@ -233,15 +228,10 @@ const WebSocketHandler = ({
             // Cleanup function
             return () => {
                 // Unregister event listeners
-                websocketService.off('ROOM_PLAYERS_UPDATED', handleRoomPlayersUpdated);
                 websocketService.off('room-players-updated', handleRoomPlayersUpdated);
-                websocketService.off('ROOM_JOINED', handleRoomJoined);
                 websocketService.off('room-joined', handleRoomJoined);
-                websocketService.off('HOST_CHANGED', handleHostChanged);
                 websocketService.off('host-changed', handleHostChanged);
-                websocketService.off('PLAYER_LEFT', handlePlayerLeft);
                 websocketService.off('player-left', handlePlayerLeft);
-                websocketService.off('PLAYER_JOINED', handlePlayerJoined);
                 websocketService.off('player-joined', handlePlayerJoined);
             };
         });

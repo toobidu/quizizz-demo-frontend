@@ -1,54 +1,41 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import {FaCheck, FaCrown} from 'react-icons/fa';
+import { FaCheck, FaCrown } from 'react-icons/fa';
+import useRealtimeUIStore from '../../stores/useRealtimeUIStore';
 import '../../style/pages/room/waitingRoom/PlayersList.css';
 
 /**
  * Danh sách người chơi trong phòng chờ - Optimized with React.memo and useMemo
  */
-const PlayersList = React.memo(({players, newPlayerIds, maxPlayers, host, currentUserId: propCurrentUserId}) => {
-    // Lấy currentUserId từ props hoặc localStorage nếu không có
-    const currentUserId = propCurrentUserId || localStorage.getItem('userId');
+const PlayersList = React.memo(({ players, newPlayerIds, maxPlayers, host, currentUserId }) => {
+    // ✅ NEW: Get real-time UI state
+    const { isPlayerNew: isPlayerNewFromStore } = useRealtimeUIStore();
 
-    // Memoized current user ID calculation
+    // ✅ FIXED: Đơn giản hóa việc xác định currentUserId
     const currentUserIdStr = useMemo(() => {
         if (currentUserId) {
             return String(currentUserId);
         }
-
-        // Nếu không, lấy từ localStorage
-        let userId = localStorage.getItem('userId');
-        if (!userId) {
-            try {
-                const token = localStorage.getItem('accessToken');
-                if (token) {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    // Fixed: Remove duplicate payload.userId
-                    userId = payload.userId || payload.sub || payload.id || payload.Id;
-                }
-            } catch (error) {
-                
-            }
-        }
-        return String(userId || '');
+        return '';
     }, [currentUserId]);
+
 
     // Memoized player status calculation
     const getPlayerStatus = useMemo(() => (player) => {
         const isHost = player.isHost;
 
         if (isHost) {
-            return {icon: <FaCrown/>, text: 'Host', className: 'host-status'};
+            return { icon: <FaCrown />, text: 'Host', className: 'host-status' };
         }
 
         // Tất cả người chơi đều được xem là sẵn sàng
-        return {icon: <FaCheck/>, text: 'Sẵn sàng', className: 'ready-status'};
+        return { icon: <FaCheck />, text: 'Sẵn sàng', className: 'ready-status' };
     }, []);
 
-    // Memoized check for new players
+    // ✅ ENHANCED: Check for new players from both sources
     const isPlayerNew = useMemo(() => (playerId) => {
-        return newPlayerIds.includes(playerId);
-    }, [newPlayerIds]);
+        return newPlayerIds.includes(playerId) || isPlayerNewFromStore(playerId);
+    }, [newPlayerIds, isPlayerNewFromStore]);
 
     if (!players || !Array.isArray(players)) {
         return (
@@ -73,6 +60,7 @@ const PlayersList = React.memo(({players, newPlayerIds, maxPlayers, host, curren
                 {players.map(player => {
                     const playerId = player.userId;
                     const username = player.username || 'Người chơi';
+                    // ✅ FIXED: So sánh chính xác currentUserId
                     const isCurrentUser = String(playerId) === currentUserIdStr;
                     const isHost = player.isHost;
 
@@ -88,31 +76,36 @@ const PlayersList = React.memo(({players, newPlayerIds, maxPlayers, host, curren
                                 <span className="avatar-text">
                                     {username.charAt(0).toUpperCase()}
                                 </span>
-                                {isHost && <div className="crown-overlay"><FaCrown/></div>}
+                                {isHost && <div className="crown-overlay"><FaCrown /></div>}
                             </div>
 
                             <div className="player-info">
                                 <div className="player-name">
                                     <span className="username">{username}</span>
+                                    {/* ✅ FIXED: Hiển thị (Bạn) đúng chỗ */}
                                     {isCurrentUser && (
                                         <span className="current-user-badge">(Bạn)</span>
                                     )}
                                     {/* Enhanced Host badge - more prominent */}
                                     {isHost && (
-                                        <span className="host-badge-inline">HOST</span>
+                                        <span className="host-badge">
+                                            <FaCrown className="crown-icon" />
+                                            Host
+                                        </span>
                                     )}
                                 </div>
 
-                                <div className={`player-status ${status.className}`}>
-                                    <span className="status-icon">{status.icon}</span>
+                                <div className="player-status">
+                                    <span className={`status-icon ${status.className}`}>
+                                        {status.icon}
+                                    </span>
                                     <span className="status-text">{status.text}</span>
                                 </div>
                             </div>
 
-                            {/* Enhanced Host badge - corner badge */}
-                            {isHost && (
-                                <div className="host-badge">
-                                    <FaCrown />
+                            {isNew && (
+                                <div className="new-player-indicator">
+                                    <span className="new-badge">Mới</span>
                                 </div>
                             )}
                         </div>
@@ -120,14 +113,14 @@ const PlayersList = React.memo(({players, newPlayerIds, maxPlayers, host, curren
                 })}
 
                 {/* Empty slots */}
-                {Array.from({length: Math.max(0, maxPlayers - players.length)}).map((_, index) => (
+                {Array.from({ length: Math.max(0, maxPlayers - players.length) }).map((_, index) => (
                     <div key={`empty-${index}`} className="player-card empty-slot">
                         <div className="player-avatar empty">
-                            <span className="avatar-text">+</span>
+                            <span className="avatar-text">?</span>
                         </div>
                         <div className="player-info">
                             <div className="player-name">
-                                <span className="username">Đang chờ...</span>
+                                <span className="username">Chờ người chơi...</span>
                             </div>
                         </div>
                     </div>
@@ -140,21 +133,11 @@ const PlayersList = React.memo(({players, newPlayerIds, maxPlayers, host, curren
 PlayersList.displayName = 'PlayersList';
 
 PlayersList.propTypes = {
-    players: PropTypes.arrayOf(PropTypes.shape({
-        userId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-        username: PropTypes.string,
-        name: PropTypes.string,
-        isHost: PropTypes.bool,
-        isReady: PropTypes.bool
-    })),
-    currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    players: PropTypes.array.isRequired,
+    newPlayerIds: PropTypes.array.isRequired,
+    maxPlayers: PropTypes.number.isRequired,
     host: PropTypes.object,
-    newPlayerIds: PropTypes.array,
-    maxPlayers: PropTypes.number
-};
-
-PlayersList.defaultProps = {
-    players: [], newPlayerIds: [], maxPlayers: 4
+    currentUserId: PropTypes.oneOfType([PropTypes.string, PropTypes.number])
 };
 
 export default PlayersList;

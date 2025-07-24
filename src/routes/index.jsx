@@ -11,6 +11,7 @@ import Profile from "../pages/Profile";
 import RoomsPage from "../pages/room/RoomsPage.jsx";
 import WaitingRoom from "../pages/room/WaitingRoom.jsx";
 import QuizGamePage from "../pages/room/QuizGamePage.jsx";
+import EnhancedGamePage from "../pages/EnhancedGamePage.jsx";
 import AboutPage from "../pages/footer/AboutPage.jsx";
 import GamesPage from "../pages/footer/GamesPage.jsx";
 import BlogPage from "../pages/footer/BlogPage.jsx";
@@ -115,6 +116,8 @@ const protectedRoutes = [{
         path: "/waiting-room/:roomCode", element: <WaitingRoom/>,
     }, {
         path: "/game/:roomCode", element: <QuizGamePage/>,
+    }, {
+        path: "/enhanced-game/:roomCode", element: <EnhancedGamePage/>,
     },];
 
 // Combine all routes

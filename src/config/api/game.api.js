@@ -22,7 +22,7 @@ export const startGame = async (data) => {
         const gameStartData = {
             roomCode: data.roomCode,
             hostUserId: data.hostUserId,
-            selectedTopicIds: data.selectedTopicIds || [1, 2, 3], // Default topics if not provided
+            selectedTopicIds: data.selectedTopicIds,
             questionCount: data.questionCount || 10,
             timeLimit: data.timeLimit || 30
         };
@@ -84,8 +84,6 @@ export const submitAnswer = async (data) => {
             roomCode: data.roomCode
         };
 
-        // Note: Answers should be submitted via WebSocket for real-time processing
-        // This API endpoint is for fallback only
         const response = await apiInstance.post('/game/answer', answerData);
         return response.data;
     } catch (error) {

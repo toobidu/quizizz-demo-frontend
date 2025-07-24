@@ -1,190 +1,128 @@
-import {useEffect} from 'react';
+import { useEffect, useRef } from 'react';
 import eventEmitter from '../../services/eventEmitter';
+import playerCountLogger from '../../utils/playerCountLogger';
 
-const WebSocketHandler = ({
-                              roomCode, players, onPlayerJoined, onPlayersUpdated
-                          }) => {
-    // Lắng nghe sự kiện trực tiếp từ eventEmitter
+const WebSocketHandler = ({ roomCode, players, onPlayerJoined, onPlayersUpdated }) => {
+    const lastUpdateTimeRef = useRef(0);
+    const playersRef = useRef(players);
+
     useEffect(() => {
-        // Check WebSocket connection status
-        import('../../services/websocketService').then(({default: websocketService}) => {
-        });
+        playersRef.current = players;
+    }, [players]);
 
-        // Theo dõi thời gian cập nhật gần nhất để tránh cập nhật quá nhiều
-        let lastUpdateTime = 0;
-        const updateThrottleMs = 2000; // Giới hạn cập nhật mỗi 2 giây
+    useEffect(() => {
+        const updateThrottleMs = 2000; // Chỉ cho phép update mỗi 2s
 
-        // Xử lý sự kiện player-joined
+        // Xử lý khi người chơi mới tham gia
         const handlePlayerJoined = (playerData) => {
-            // Kiểm tra xem dữ liệu có thuộc về phòng hiện tại không
             const dataRoomCode = playerData.roomCode;
-            
-            if (dataRoomCode && dataRoomCode !== roomCode) {
-                return;
-            }
+            if (dataRoomCode && dataRoomCode !== roomCode) return;
 
-            // Lấy userId từ dữ liệu người chơi
             const userId = playerData.userId;
-            
-            if (!userId) {
-                return;
-            }
+            if (!userId) return;
 
-            // Kiểm tra xem người chơi đã có trong danh sách chưa
-            const currentPlayerIds = players.map(p => p.userId).filter(Boolean);
+            const currentPlayerIds = playersRef.current.map(p => p.userId).filter(Boolean);
+            if (currentPlayerIds.includes(userId)) return;
 
-            if (!currentPlayerIds.includes(userId)) {
-                // Chuẩn hóa dữ liệu người chơi
-                const normalizedPlayer = {
-                    userId: userId,
-                    username: playerData.username || 'Unknown',
-                    isHost: playerData.isHost || false,
-                    score: playerData.score || 0,
-                    isReady: playerData.isReady || false,
-                    joinTime: playerData.joinTime || new Date().toISOString()
-                };
+            const normalizedPlayer = {
+                userId,
+                username: playerData.username || 'Unknown',
+                isHost: playerData.isHost || false,
+                score: playerData.score || 0,
+                isReady: playerData.isReady || false,
+                joinTime: playerData.joinTime || new Date().toISOString()
+            };
 
-                // Gọi callback để thêm người chơi mới
-                onPlayerJoined(normalizedPlayer);
+            onPlayerJoined(normalizedPlayer);
+            playerCountLogger.logPlayerCount(roomCode, playersRef.current.length + 1, 'join');
 
-                // Yêu cầu cập nhật danh sách người chơi, nhưng giới hạn tần suất
-                const now = Date.now();
-                if (now - lastUpdateTime > updateThrottleMs) {
-                    lastUpdateTime = now;
-                    setTimeout(() => {
-                        import('../../services/websocketService').then(({default: websocketService}) => {
-                            websocketService.send('request-players-update', {roomCode});
-                        });
-                    }, 500); // Trì hoãn 500ms để tránh gửi quá nhiều yêu cầu
-                }
-            }
-        };
-
-        // Xử lý sự kiện player-left
-        const handlePlayerLeft = (playerData) => {
-            // Kiểm tra xem dữ liệu có thuộc về phòng hiện tại không
-            if (playerData.roomCode && playerData.roomCode !== roomCode) {
-                return;
-            }
-
-            // Lấy userId từ dữ liệu người chơi
-            const userId = playerData.userId;
-            if (!userId) {
-                return;
-            }
-
-            // Cập nhật danh sách người chơi bằng cách loại bỏ người chơi đã rời đi
-            const updatedPlayers = players.filter(p => {
-                const playerId = p.userId;
-                return playerId !== userId;
-            });
-
-            // Gọi callback để cập nhật danh sách người chơi
-            onPlayersUpdated(updatedPlayers);
-
-            // Cập nhật thời gian cập nhật gần nhất
-            lastUpdateTime = Date.now();
-        };
-
-        // Xử lý sự kiện room-players-updated
-        const handleRoomPlayersUpdated = (data) => {
-            // FIX: Xử lý trường hợp data có thể undefined hoặc có cấu trúc khác nhau
-            if (!data) {
-                
-                return;
-            }
-            
-            // Extract roomCode từ nhiều nguồn có thể
-            const dataRoomCode = data.roomCode || data.RoomCode;
-            
-            if (dataRoomCode && dataRoomCode !== roomCode) {
-                return;
-            }
-
-            // Kiểm tra thời gian giới hạn để tránh cập nhật quá nhiều
             const now = Date.now();
-            if (now - lastUpdateTime < 1000) { // Giới hạn cập nhật mỗi 1 giây
-                return;
+            if (now - lastUpdateTimeRef.current > updateThrottleMs) {
+                lastUpdateTimeRef.current = now;
+                setTimeout(() => {
+                    import('../../services/websocketService').then(({ default: websocketService }) => {
+                        websocketService.send('request-players-update', { roomCode });
+                    });
+                }, 500);
             }
+        };
 
-            // Lấy danh sách người chơi từ dữ liệu với nhiều cách possible
+        // Xử lý khi người chơi rời khỏi phòng
+        const handlePlayerLeft = (playerData) => {
+            if (playerData.roomCode && playerData.roomCode !== roomCode) return;
+
+            const userId = playerData.userId;
+            if (!userId) return;
+
+            const updatedPlayers = playersRef.current.filter(p => p.userId !== userId);
+            onPlayersUpdated(updatedPlayers);
+            playerCountLogger.logPlayerCount(roomCode, updatedPlayers.length, 'leave');
+            lastUpdateTimeRef.current = Date.now();
+        };
+
+        // Cập nhật danh sách người chơi toàn phòng
+        const handleRoomPlayersUpdated = (data) => {
+            if (!data) return;
+
+            const dataRoomCode = data.roomCode || data.RoomCode;
+            if (dataRoomCode && dataRoomCode !== roomCode) return;
+
+            const now = Date.now();
+            if (now - lastUpdateTimeRef.current < 1000) return;
+
             let newPlayers = [];
-            // Thử các trường hợp khác nhau
-            if (data.players && Array.isArray(data.players)) {
+            if (Array.isArray(data.players)) {
                 newPlayers = data.players;
             } else if (Array.isArray(data)) {
-                // Trường hợp data trực tiếp là mảng người chơi
                 newPlayers = data;
             } else {
                 return;
             }
-            
-            // Kiểm tra xem danh sách có thay đổi không
-            if (newPlayers.length === players.length) {
-                // Nếu số lượng người chơi không thay đổi, kiểm tra xem có sự thay đổi về người chơi không
-                const currentIds = new Set(players.map(p => p.userId || p.id || p.Id));
-                const newIds = new Set(newPlayers.map(p => p.userId || p.id || p.Id));
 
-                // Kiểm tra xem có người chơi mới không
-                let hasChanges = false;
-                for (const id of newIds) {
-                    if (!currentIds.has(id)) {
-                        hasChanges = true;
-                        break;
-                    }
-                }
+            const currentIds = new Set(playersRef.current.map(p => p.userId || p.id || p.Id));
+            const newIds = new Set(newPlayers.map(p => p.userId || p.id || p.Id));
 
-                // Nếu không có thay đổi, bỏ qua cập nhật
-                if (!hasChanges) {
-                    return;
-                }
+            if (currentIds.size === newIds.size && [...newIds].every(id => currentIds.has(id))) {
+                return;
             }
 
-            // Chuẩn hóa dữ liệu người chơi
-            const normalizedPlayers = newPlayers.map(player => {
-                const normalized = {
-                    userId: player.userId || player.id || player.Id,
-                    username: player.username || player.userName || player.name || player.Name || 'Unknown',
-                    isHost: player.isHost || false,
-                    score: player.score || player.Score || 0,
-                    isReady: player.isReady || false,
-                    joinTime: player.joinTime || new Date().toISOString()
-                };
-                
-                return normalized;
-            });
-            // Gọi callback để cập nhật danh sách người chơi
-            onPlayersUpdated(normalizedPlayers, data.host, data.totalPlayers, data.maxPlayers);
+            const normalizedPlayers = newPlayers.map(player => ({
+                userId: player.userId || player.id || player.Id,
+                username: player.username || player.userName || player.name || player.Name || 'Unknown',
+                isHost: player.isHost || false,
+                score: player.score || player.Score || 0,
+                isReady: player.isReady || false,
+                joinTime: player.joinTime || new Date().toISOString()
+            }));
 
-            // Cập nhật thời gian cập nhật gần nhất
-            lastUpdateTime = now;
+            onPlayersUpdated(normalizedPlayers, data.host, data.totalPlayers, data.maxPlayers);
+            lastUpdateTimeRef.current = now;
         };
 
-        // Đăng ký lắng nghe sự kiện
+        // Đăng ký listener
         eventEmitter.on('player-joined', handlePlayerJoined);
         eventEmitter.on('player-left', handlePlayerLeft);
         eventEmitter.on('room-players-updated', handleRoomPlayersUpdated);
 
-        // Yêu cầu cập nhật danh sách người chơi khi component mount, nhưng trì hoãn để tránh cập nhật liên tục
+        // Gửi yêu cầu cập nhật danh sách khi mount
         if (roomCode) {
             setTimeout(() => {
-                import('../../services/websocketService').then(({default: websocketService}) => {
-                    websocketService.send('request-players-update', {roomCode});
-                    lastUpdateTime = Date.now();
+                import('../../services/websocketService').then(({ default: websocketService }) => {
+                    websocketService.send('request-players-update', { roomCode });
+                    lastUpdateTimeRef.current = Date.now();
                 });
-            }, 1500); // Trì hoãn 1.5 giây để tránh cập nhật liên tục khi mount
+            }, 1500);
         }
 
-        // Cleanup khi component unmount
+        // Cleanup khi unmount
         return () => {
             eventEmitter.off('player-joined', handlePlayerJoined);
             eventEmitter.off('player-left', handlePlayerLeft);
             eventEmitter.off('room-players-updated', handleRoomPlayersUpdated);
         };
-    }, [roomCode, players, onPlayerJoined, onPlayersUpdated]);
+    }, [roomCode, onPlayerJoined, onPlayersUpdated]);
 
-    // This component doesn't render anything
-    return null;
+    return null; // Không render UI
 };
 
 export default WebSocketHandler;

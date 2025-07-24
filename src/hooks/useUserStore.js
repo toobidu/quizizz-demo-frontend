@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import profileApi from '../config/api/profile.api';
 import authApi from '../config/api/auth.api';
-import websocketService from '../services/websocketService';
+import unifiedWebSocketService from '../services/unifiedWebSocketService';
 
 const useUserStore = create((set, get) => ({
     // User data
@@ -30,12 +30,14 @@ const useUserStore = create((set, get) => ({
             if (profileData.status === 200 || profileData.status === 200) {
                 const userData = profileData.data || profileData.data;
                 set({
-                    userName: userData?.username || userData?.username || 'User', stats: {
-                        highScore: userData?.Stats?.TotalPoints || userData?.stats?.totalPoints || 0,
-                        rank: userData?.Stats?.Rank || userData?.stats?.rank || 'N/A',
-                        fastestTime: userData?.Stats?.FastestTime || userData?.stats?.fastestTime || 'N/A',
-                        bestTopic: userData?.Stats?.BestTopic || userData?.stats?.bestTopic || 'N/A'
-                    }, loading: false
+                    userName: userData?.username || userData?.username, 
+                    stats: {
+                        highScore: userData?.Stats?.TotalPoints || userData?.stats?.totalPoints,
+                        rank: userData?.Stats?.Rank || userData?.stats?.rank,
+                        fastestTime: userData?.Stats?.FastestTime || userData?.stats?.fastestTime,
+                        bestTopic: userData?.Stats?.BestTopic || userData?.stats?.bestTopic
+                    }, 
+                    loading: false
                 });
             } else {
                 set({loading: false});
@@ -46,7 +48,7 @@ const useUserStore = create((set, get) => ({
     },
 
     logout: async (navigate) => {
-        websocketService.disconnect();
+        unifiedWebSocketService.disconnect();
         await authApi.logout();
         localStorage.removeItem('username');
         set({

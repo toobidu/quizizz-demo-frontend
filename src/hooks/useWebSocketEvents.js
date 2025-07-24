@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import websocketService from '../services/websocketService';
+import unifiedWebSocketService from '../services/unifiedWebSocketService';
 
 /**
  * Hook để lắng nghe WebSocket events
@@ -11,10 +11,10 @@ export const useWebSocketEvent = (event, callback, deps = []) => {
     useEffect(() => {
         if (!event || !callback) return;
 
-        websocketService.on(event, callback);
+        unifiedWebSocketService.on(event, callback);
 
         return () => {
-            websocketService.off(event, callback);
+            unifiedWebSocketService.off(event, callback);
         };
     }, [event, callback, ...deps]);
 };

@@ -215,7 +215,7 @@ const QuizGamePage = () => {
     
     const firstQuestion = questions[0];
     setCurrentQuestion(firstQuestion);
-    setTimeLeft(firstQuestion.timeLimit || 30);
+    setTimeLeft(firstQuestion.timeLimit);
     
   };
 
@@ -272,7 +272,7 @@ const QuizGamePage = () => {
     
     setCurrentQuestion(nextQuestion);
     setQuestionNumber(questionNumber + 1);
-    setTimeLeft(nextQuestion.timeLimit || 30);
+    setTimeLeft(nextQuestion.timeLimit);
     
   };
 

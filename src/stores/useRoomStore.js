@@ -5,7 +5,6 @@ const originalStore = useRoomStore;
 // Create a wrapper that adds the missing function
 const wrappedStore = () => {
     const store = originalStore();
-
     // If cleanupWebSocketListeners is missing, add it
     if (!store.cleanupWebSocketListeners) {
         store.cleanupWebSocketListeners = () => {

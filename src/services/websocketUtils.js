@@ -4,20 +4,15 @@
  * Cung cấp các hàm tiện ích để quản lý kết nối WebSocket
  */
 
-import websocketService from './websocketService';
+import unifiedWebSocketService from './unifiedWebSocketService';
+import { centralizedConnectionManager } from './centralizedConnectionManager.js';
 
 /**
  * Kiểm tra kết nối WebSocket và kết nối nếu cần
  * @returns {boolean} Trạng thái kết nối
  */
-export const ensureWebSocketConnection = () => {
-    const isConnected = websocketService.isConnected;
-
-    if (!isConnected) {
-        websocketService.connect();
-    }
-
-    return isConnected;
+export const ensureWebSocketConnection = async () => {
+    return await centralizedConnectionManager.ensureConnection();
 };
 
 /**
@@ -80,7 +75,7 @@ export const joinRoomWithFullInfo = (roomCode) => {
         }
 
         // Gửi thông tin đầy đủ qua WebSocket
-        websocketService.joinRoom(roomCode, username, userId);
+        unifiedWebSocketService.joinRoom(roomCode, username, userId);
         return true;
     } catch (error) {
         
@@ -118,7 +113,7 @@ export const leaveRoomWithFullInfo = (roomCode) => {
             username = localStorage.getItem('username') || localStorage.getItem('name');
         }
 
-        websocketService.leaveRoom(roomCode, username, userId);
+        unifiedWebSocketService.leaveRoom(roomCode, username, userId);
     } catch (error) {
         
     }

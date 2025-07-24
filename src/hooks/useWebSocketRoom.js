@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import websocketService from '../services/websocketService';
+import unifiedWebSocketService from '../services/unifiedWebSocketService';
 import {ensureWebSocketConnection, joinRoomWithFullInfo, leaveRoomWithFullInfo} from '../services/websocketUtils';
 import eventEmitter from '../services/eventEmitter';
 
@@ -78,7 +78,7 @@ const useWebSocketRoom = (roomCode) => {
             if (now - lastUpdateTime > updateThrottleMs) {
                 lastUpdateTime = now;
                 setTimeout(() => {
-                    websocketService.requestPlayersUpdate(roomCode);
+                    unifiedWebSocketService.requestPlayersUpdate(roomCode);
                 }, 500); // Trì hoãn 500ms để tránh gửi quá nhiều yêu cầu
             }
         };
@@ -163,13 +163,13 @@ const useWebSocketRoom = (roomCode) => {
         eventEmitter.on('countdown', handleCountdown);
 
         // Đăng ký lắng nghe các sự kiện game từ WebSocket
-        websocketService.on('player-status-changed', handlePlayerStatusChanged);
-        websocketService.on('game-started', handleGameStarted);
-        websocketService.on('countdown', handleCountdown);
+        unifiedWebSocketService.on('player-status-changed', handlePlayerStatusChanged);
+        unifiedWebSocketService.on('game-started', handleGameStarted);
+        unifiedWebSocketService.on('countdown', handleCountdown);
 
         // Yêu cầu cập nhật danh sách người chơi khi component mount, nhưng trì hoãn để tránh cập nhật liên tục
         setTimeout(() => {
-            websocketService.requestPlayersUpdate(roomCode);
+            unifiedWebSocketService.requestPlayersUpdate(roomCode);
             lastUpdateTime = Date.now();
         }, 1000); // Trì hoãn 1 giây để tránh cập nhật liên tục khi mount
 
@@ -182,9 +182,9 @@ const useWebSocketRoom = (roomCode) => {
             eventEmitter.off('countdown', handleCountdown);
 
             // Hủy đăng ký lắng nghe các sự kiện game từ WebSocket
-            websocketService.off('player-status-changed', handlePlayerStatusChanged);
-            websocketService.off('game-started', handleGameStarted);
-            websocketService.off('countdown', handleCountdown);
+            unifiedWebSocketService.off('player-status-changed', handlePlayerStatusChanged);
+            unifiedWebSocketService.off('game-started', handleGameStarted);
+            unifiedWebSocketService.off('countdown', handleCountdown);
         };
     }, [roomCode]);
 
@@ -195,7 +195,7 @@ const useWebSocketRoom = (roomCode) => {
         }
 
         try {
-            websocketService.send(type, {...data, roomCode});
+            unifiedWebSocketService.send(type, {...data, roomCode});
             return true;
         } catch (error) {
             return false;
@@ -207,7 +207,7 @@ const useWebSocketRoom = (roomCode) => {
         if (!isConnected || !roomCode) return false;
 
         try {
-            websocketService.send('player-ready', {
+            unifiedWebSocketService.send('player-ready', {
                 roomCode, ready
             });
             return true;
@@ -221,7 +221,7 @@ const useWebSocketRoom = (roomCode) => {
         if (!isConnected || !roomCode) return false;
 
         try {
-            websocketService.send('start-game', {roomCode});
+            unifiedWebSocketService.send('start-game', {roomCode});
             return true;
         } catch (error) {
             return false;

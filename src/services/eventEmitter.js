@@ -31,13 +31,24 @@ class EventEmitter {
     }
 
     emit(event, data) {
-        if (!this.events[event]) return this;
+        console.log('📡 [EVENT_EMITTER] === EMITTING EVENT ===');
+        console.log('📡 [EVENT_EMITTER] Event:', event);
+        console.log('📡 [EVENT_EMITTER] Data:', data);
+        console.log('📡 [EVENT_EMITTER] Timestamp:', new Date().toISOString());
+        console.log('📡 [EVENT_EMITTER] Listeners count:', this.events[event]?.length || 0);
+        
+        if (!this.events[event]) {
+            console.log('📡 [EVENT_EMITTER] ⚠️ No listeners for event:', event);
+            return this;
+        }
 
-        this.events[event].forEach(callback => {
+        this.events[event].forEach((callback, index) => {
             try {
+                console.log('📡 [EVENT_EMITTER] 🔄 Calling listener', index + 1, 'for event:', event);
                 callback(data);
+                console.log('📡 [EVENT_EMITTER] ✅ Listener', index + 1, 'executed successfully');
             } catch (error) {
-                
+                console.log('📡 [EVENT_EMITTER] ❌ Error in listener', index + 1, 'for event:', event, error);
             }
         });
         return this;

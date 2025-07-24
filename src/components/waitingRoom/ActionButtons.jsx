@@ -14,13 +14,23 @@ const ActionButtons = React.memo(({
     // Sử dụng canStartGame từ props thay vì tính toán lại
     const startButtonText = canStartGame ? 'Bắt đầu trò chơi' : 'Chờ người chơi tham gia';
 
+    const handleStartClick = () => {
+        console.log('🎮 [ACTION_BUTTONS] === START BUTTON CLICKED ===');
+        console.log('🎮 [ACTION_BUTTONS] Timestamp:', new Date().toISOString());
+        console.log('🎮 [ACTION_BUTTONS] Is host:', isHost);
+        console.log('🎮 [ACTION_BUTTONS] Can start game:', canStartGame);
+        console.log('🎮 [ACTION_BUTTONS] Players:', players);
+        console.log('🎮 [ACTION_BUTTONS] Calling onStartGame...');
+        onStartGame();
+    };
+
     return (
         <div className="action-section">
             {/* Chỉ hiển thị nút bắt đầu khi người dùng thực sự là host */}
             {isHost && (
                 <button
                     className={`btn-start ${canStartGame ? 'enabled' : 'disabled'}`}
-                    onClick={onStartGame}
+                    onClick={handleStartClick}
                     disabled={!canStartGame}
                 >
                     <FiPlay className="btn-icon"/>
