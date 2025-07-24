@@ -1,0 +1,36 @@
+.ready-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  outline: none;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 200px;
+}
+
+.ready-button.not-ready {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+}
+
+.ready-button.ready {
+  background-color: #4caf50;
+  color: white;
+  border: 2px solid #45a049;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.ready-button:hover {
+  transform: translateY(-2px);
+}
+
+.ready-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

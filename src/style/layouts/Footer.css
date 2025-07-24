@@ -1,0 +1,458 @@
+/* Footer Container */
+.footer-container {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1f2937 100%);
+    color: #e5e7eb;
+    margin-top: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+            radial-gradient(circle at 20% 50%, rgba(92, 107, 192, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(63, 81, 181, 0.1) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+/* Main Footer */
+.footer-main {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 0 2rem;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr;
+    gap: 3rem;
+}
+
+/* Brand Section */
+.brand-section {
+    max-width: 350px;
+}
+
+.footer-logo h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #5c6bc0;
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.footer-tagline {
+    font-size: 0.9rem;
+    color: #9ca3af;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 1.5rem;
+}
+
+.brand-description {
+    color: #d1d5db;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+/* Social Links */
+.footer-social-links {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-social-link {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.footer-social-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.footer-social-link.facebook {
+    color: #1877f2;
+}
+
+.footer-social-link.facebook:hover {
+    background: #1877f2;
+    color: white;
+}
+
+.footer-social-link.twitter {
+    color: #000000;
+}
+
+.footer-social-link.twitter:hover {
+    background: #000000;
+    color: white;
+}
+
+.footer-social-link.instagram {
+    color: #E1306C;
+}
+
+.footer-social-link.instagram:hover {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+    color: white;
+}
+
+.footer-social-link.youtube {
+    color: #ff0000;
+}
+
+.footer-social-link.youtube:hover {
+    background: #ff0000;
+    color: white;
+}
+
+/* Đảm bảo icon hiển thị đúng */
+.footer-social-link svg {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+/* Footer Sections */
+.footer-section h3 {
+    color: #f9fafb;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.footer-section h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(90deg, #5c6bc0, #3f51b5);
+    border-radius: 1px;
+}
+
+/* Footer Links */
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.footer-links a {
+    color: #d1d5db;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    padding: 0.25rem 0;
+    position: relative;
+    display: inline-block;
+}
+
+.footer-links a:hover {
+    color: #5c6bc0;
+    transform: translateX(5px);
+}
+
+.footer-links a::before {
+    content: '';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 1px;
+    background: #5c6bc0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.footer-links a:hover::before {
+    opacity: 1;
+}
+
+/* Contact Info */
+.contact-info {
+    margin-bottom: 2rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+    font-size: 0.95rem;
+}
+
+.contact-icon {
+    color: #5c6bc0;
+    font-size: 1rem;
+    min-width: 16px;
+}
+
+/* Newsletter */
+.newsletter {
+    margin-top: 1.5rem;
+}
+
+.newsletter h4 {
+    color: #f9fafb;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.newsletter-form {
+    display: flex;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #e5e7eb;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.newsletter-form input::placeholder {
+    color: #9ca3af;
+}
+
+.newsletter-form input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #5c6bc0;
+}
+
+.newsletter-form button {
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(45deg, #5c6bc0, #3f51b5);
+    color: white;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.newsletter-form button:hover {
+    background: linear-gradient(45deg, #3f51b5, #303f9f);
+    transform: translateY(-1px);
+}
+
+/* Footer Bottom */
+.footer-bottom {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem 0;
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    justify-content: center; /* căn giữa ngang */
+    align-items: center;      /* căn giữa dọc (nếu có chiều cao) */
+    text-align: center;
+}
+
+.footer-bottom-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.copyright p {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.made-in-vietnam {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #9ca3af;
+    font-size: 0.9rem;
+}
+
+.vietnam-flag {
+    height: 20px;
+    width: auto;
+    border-radius: 2px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.made-in-vietnam:hover .vietnam-flag {
+    transform: scale(1.1);
+}
+
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .footer-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+    }
+
+    .brand-section {
+        max-width: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .footer-main {
+        padding: 3rem 0 1.5rem;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 0 1.5rem;
+    }
+
+    .footer-logo h2 {
+        font-size: 1.75rem;
+    }
+
+    .footer-social-links {
+        justify-content: center;
+    }
+
+    .footer-section {
+        text-align: center;
+    }
+
+    .footer-links {
+        align-items: center;
+    }
+
+    .contact-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .newsletter-form {
+        flex-direction: column;
+        border-radius: 8px;
+    }
+
+    .newsletter-form input,
+    .newsletter-form button {
+        border-radius: 8px;
+    }
+
+    .newsletter-form input {
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-bottom-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 0 1.5rem;
+        gap: 0.75rem;
+    }
+
+    .made-in-vietnam {
+        justify-content: center;
+        margin-top: 0.5rem;
+    }
+
+    .footer-bottom-links {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-main {
+        padding: 2rem 0 1rem;
+    }
+
+    .footer-content {
+        padding: 0 1rem;
+    }
+
+    .footer-logo h2 {
+        font-size: 1.5rem;
+    }
+
+    .social-links {
+        gap: 0.75rem;
+    }
+
+    .footer-social-link {
+        width: 40px;
+        height: 40px;
+    }
+
+    .footer-section h3 {
+        font-size: 1.1rem;
+    }
+
+    .footer-bottom-links {
+        gap: 1rem;
+    }
+
+    .footer-bottom-links a {
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.footer-section {
+    animation: fadeInUp 0.8s ease-out;
+}
+
+.footer-section:nth-child(1) { animation-delay: 0.1s; }
+.footer-section:nth-child(2) { animation-delay: 0.2s; }
+.footer-section:nth-child(3) { animation-delay: 0.3s; }
+.footer-section:nth-child(4) { animation-delay: 0.4s; }

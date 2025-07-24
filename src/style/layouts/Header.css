@@ -1,0 +1,180 @@
+.hd-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.hd-header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hd-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.hd-header-left {
+  min-width: 150px;
+  padding-right: 20px;
+}
+
+.hd-header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.hd-logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  margin-left: -10px; /* Điều chỉnh logo gần về bên trái hơn */
+}
+
+.hd-nav {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.hd-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: auto;
+}
+
+.hd-nav-theme-toggle {
+  display: flex;
+  align-items: center;
+}
+
+.hd-nav-link {
+  color: rgba(255, 255, 255, 0.9);
+  text-decoration: none;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.hd-nav-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.hd-user-menu {
+  position: relative;
+}
+
+.hd-user-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.hd-user-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hd-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.hd-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.hd-dropdown-menu.open {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.hd-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: #495057;
+  text-decoration: none;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.hd-dropdown-item:hover {
+  background-color: #f8f9fa;
+  color: #667eea;
+}
+
+.hd-dropdown-item.logout:hover {
+  background-color: #fee;
+  color: #dc3545;
+}
+
+.hd-dropdown-divider {
+  height: 1px;
+  background-color: #e9ecef;
+  margin: 0.25rem 0;
+}
+
+@media (max-width: 768px) {
+  .hd-header-content {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .hd-header-left {
+    min-width: auto;
+    padding-right: 10px;
+  }
+  
+  .hd-nav-link {
+    display: none;
+  }
+  
+  .hd-nav-link:last-of-type {
+    display: block;
+  }
+}

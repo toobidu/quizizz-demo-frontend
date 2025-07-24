@@ -1,0 +1,400 @@
+/* Keyframes */
+@keyframes vo-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes vo-slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes vo-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+@keyframes vo-spinner-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Container & Background */
+.vo-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Card */
+.vo-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    z-index: 1;
+    animation: vo-fadeIn 0.6s ease-out;
+}
+
+/* Back Button */
+.vo-back-button {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0.5rem;
+    background: transparent;
+    cursor: pointer;
+    border: none;
+    color: #667eea;
+}
+
+.vo-back-button:hover {
+    transform: translateX(-3px);
+}
+
+/* Header */
+.vo-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-top: 1rem;
+}
+
+.vo-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.vo-logo-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vo-logo-text {
+    font-size: 1.75rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.vo-shield-icon {
+    margin-bottom: 1.5rem;
+    color: #667eea;
+}
+
+.vo-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 0.75rem;
+}
+
+.vo-subtitle {
+    color: #718096;
+    font-size: 1rem;
+    max-width: 320px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.vo-subtitle strong {
+    color: #667eea;
+}
+
+/* Error Message */
+.vo-error {
+    color: #e53e3e;
+    background: rgba(254, 215, 215, 0.3);
+    border: 1px solid rgba(254, 178, 178, 0.5);
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: vo-slideIn 0.3s ease-out;
+}
+
+/* Form */
+.vo-form {
+    margin-bottom: 1.5rem;
+}
+
+/* OTP Inputs */
+.vo-otp-inputs {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.vo-otp-inputs:focus {
+    outline: none;
+}
+
+.vo-otp-input {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #2d3748;
+}
+
+.vo-otp-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.vo-otp-input-error {
+    border-color: #f56565;
+}
+
+.vo-otp-input-error:focus {
+    border-color: #f56565;
+    box-shadow: 0 0 0 3px rgba(245, 101, 101, 0.1);
+}
+
+/* Submit Button */
+.vo-submit-button {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.vo-submit-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.vo-submit-button:active {
+    transform: translateY(0);
+}
+
+.vo-submit-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.vo-submit-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.vo-submit-button:hover::before {
+    left: 100%;
+}
+
+/* Improved Loading Spinner */
+.vo-loading-spinner-container {
+    position: relative;
+    width: 24px;
+    height: 24px;
+}
+
+.vo-loading-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    animation: vo-spinner-rotate 0.8s linear infinite;
+}
+
+.vo-loading-spinner::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: rgba(255, 255, 255, 0.5);
+    animation: vo-spinner-rotate 1.2s linear infinite reverse;
+}
+
+.vo-submit-button.loading {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+}
+
+.vo-submit-button.loading .vo-button-text {
+    animation: vo-pulse 1.5s infinite;
+}
+
+/* Resend Section */
+.vo-resend-section {
+    text-align: center;
+    color: #718096;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.vo-resend-button {
+    background: none;
+    border: none;
+    color: #667eea;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    padding: 0;
+}
+
+.vo-resend-button:hover {
+    color: #5a67d8;
+    text-decoration: underline;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .vo-container {
+        padding: 1rem;
+    }
+
+    .vo-card {
+        padding: 2rem 1.5rem;
+        border-radius: 16px;
+    }
+
+    .vo-title {
+        font-size: 1.5rem;
+    }
+
+    .vo-logo-text {
+        font-size: 1.5rem;
+    }
+
+    .vo-back-button {
+        top: 1rem;
+        left: 1rem;
+    }
+
+    .vo-otp-inputs {
+        gap: 0.5rem;
+    }
+
+    .vo-otp-input {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .vo-card {
+        background: rgba(26, 32, 44, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .vo-title {
+        color: #f7fafc;
+    }
+
+    .vo-subtitle {
+        color: #e2e8f0;
+    }
+
+    .vo-otp-input {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: #f7fafc;
+    }
+
+    .vo-otp-input:focus {
+        background: #1a202c;
+    }
+
+    .vo-back-button {
+        background: transparent;
+    }
+
+    .vo-back-button:hover {
+        background: transparent;
+    }
+}
+
+/* Accessibility */
+.vo-otp-input:focus-visible,
+.vo-submit-button:focus-visible,
+.vo-back-button:focus-visible,
+.vo-resend-button:focus-visible {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}

@@ -1,0 +1,23 @@
+.leave-room-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  color: #e5e7eb;
+  min-width: 250px;
+}
+
+.leave-room-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  color: #ef5350;
+  border-color: rgba(244, 67, 54, 0.3);
+  transform: translateY(-2px);
+}

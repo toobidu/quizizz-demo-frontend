@@ -1,0 +1,475 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.wp-welcome-page-container {
+    min-height: 100vh;
+    background: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hero Section */
+.wp-hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    text-align: center;
+    background: linear-gradient(135deg, #4776E6 0%, #8E54E9 100%);
+    color: white;
+    width: 100%;
+}
+
+.wp-hero-content {
+    max-width: 800px;
+    z-index: 2;
+    position: relative;
+}
+
+.wp-logo-container {
+    margin-bottom: 3rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.wp-logo {
+    font-size: 4rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: -2px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.wp-logo-tagline {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.wp-hero-text {
+    margin-bottom: 3rem;
+}
+
+.wp-title {
+    font-size: 3rem;
+    color: #ffffff;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease-out 0.2s both;
+    line-height: 1.2;
+    font-weight: 700;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.wp-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    animation: fadeIn 0.8s ease-out 0.4s both;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
+    font-weight: 400;
+}
+
+.wp-button-group {
+    display: flex;
+    gap: 1.5rem;
+    animation: fadeIn 0.8s ease-out 0.6s both;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.wp-btn {
+    padding: 1.2rem 2.8rem;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+    min-width: 180px;
+    font-size: 1.1rem;
+    border: none;
+    outline: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.5px;
+}
+
+.wp-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.wp-btn.primary {
+    background: #FF6B6B;
+    color: white;
+}
+
+.wp-btn.primary:hover {
+    background: #FF5252;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(255, 107, 107, 0.3);
+}
+
+.wp-btn.secondary {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+    backdrop-filter: blur(10px);
+}
+
+.wp-btn.secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 30px rgba(255, 255, 255, 0.2);
+}
+
+/* Decorative Elements */
+.wp-hero-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.wp-floating-shape {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    animation: float 6s ease-in-out infinite;
+}
+
+.wp-shape-1 {
+    width: 200px;
+    height: 200px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.wp-shape-2 {
+    width: 150px;
+    height: 150px;
+    top: 70%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.wp-shape-3 {
+    width: 100px;
+    height: 100px;
+    top: 50%;
+    left: 80%;
+    animation-delay: 4s;
+}
+
+.wp-shape-4 {
+    width: 120px;
+    height: 120px;
+    bottom: 15%;
+    left: 30%;
+    animation-delay: 3s;
+}
+
+/* Overlay gradient for hero section */
+.wp-hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at bottom right, rgba(142, 84, 233, 0.8) 0%, rgba(71, 118, 230, 0.8) 100%);
+    z-index: 1;
+}
+
+.wp-hero-content {
+    max-width: 900px;
+    z-index: 2;
+    position: relative;
+    padding: 2rem;
+}
+
+/* Features Section */
+.wp-features-section {
+    padding: 5rem 2rem;
+    background: white;
+    position: relative;
+}
+
+.wp-section-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.wp-section-title {
+    font-size: 2.5rem;
+    color: #2e3a59;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.wp-section-subtitle {
+    font-size: 1.1rem;
+    color: #616161;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.wp-features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out 0.3s both;
+}
+
+.wp-feature-card {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    text-align: center;
+    border: 1px solid rgba(92, 107, 192, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.wp-feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #5c6bc0, #3f51b5);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.wp-feature-card:hover::before {
+    transform: translateX(0);
+}
+
+.wp-feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+}
+
+.wp-feature-icon-wrapper {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(45deg, rgba(92, 107, 192, 0.1), rgba(63, 81, 181, 0.1));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.wp-feature-card:hover .wp-feature-icon-wrapper {
+    transform: scale(1.1);
+    background: linear-gradient(45deg, rgba(92, 107, 192, 0.2), rgba(63, 81, 181, 0.2));
+}
+
+.wp-feature-icon {
+    font-size: 2.5rem;
+    animation: pulse 2s infinite;
+}
+
+.wp-feature-title {
+    font-size: 1.4rem;
+    color: #2e3a59;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.wp-feature-text {
+    color: #616161;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+/* CTA Section */
+.wp-cta-section {
+    background: linear-gradient(135deg, #5c6bc0, #3f51b5);
+    padding: 5rem 2rem;
+    text-align: center;
+    color: white;
+}
+
+.wp-cta-content {
+    max-width: 600px;
+    margin: 0 auto;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.wp-cta-title {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.wp-cta-subtitle {
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+    opacity: 0.9;
+    line-height: 1.6;
+}
+
+.wp-cta-button {
+    background: white;
+    color: #5c6bc0;
+    font-size: 1.1rem;
+    padding: 1.2rem 3rem;
+    min-width: 200px;
+}
+
+.wp-cta-button:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .wp-logo {
+        font-size: 2.5rem;
+    }
+
+    .wp-title {
+        font-size: 2rem;
+    }
+
+    .wp-section-title {
+        font-size: 2rem;
+    }
+
+    .wp-cta-title {
+        font-size: 1.8rem;
+    }
+
+    .wp-button-group {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .wp-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+
+    .wp-features-grid {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .wp-floating-shape {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .wp-hero-section,
+    .wp-features-section,
+    .wp-cta-section {
+        padding: 2rem 1rem;
+    }
+
+    .wp-feature-card {
+        padding: 2rem;
+    }
+
+    .wp-logo {
+        font-size: 2rem;
+    }
+
+    .wp-title {
+        font-size: 1.5rem;
+    }
+
+    .wp-subtitle {
+        font-size: 1rem;
+    }
+}
+/* Scrollbar Customization (Webkit browsers: Chrome, Safari) */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #e0e0e0;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #5c6bc0, #3f51b5);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #3f51b5, #303f9f);
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: #5c6bc0 #e0e0e0;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    height: 100%;
+}
+
+body {
+    line-height: 1;
+}

@@ -1,0 +1,35 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: 80px; /* Để tránh nội dung bị che bởi header cố định */
+  background-color: #f8f9fa;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hiệu ứng gradient nhẹ cho nền */
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 20%, rgba(92, 107, 192, 0.03) 0%, transparent 25%),
+    radial-gradient(circle at 80% 50%, rgba(63, 81, 181, 0.03) 0%, transparent 25%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 70px;
+  }
+}

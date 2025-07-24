@@ -1,0 +1,168 @@
+.terms-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.terms-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.terms-header h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.terms-header p {
+  font-size: 1rem;
+  color: #777;
+}
+
+.terms-content {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 2rem;
+}
+
+.terms-toc {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  align-self: start;
+  position: sticky;
+  top: 2rem;
+}
+
+.terms-toc h2 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.terms-toc ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.terms-toc li {
+  margin-bottom: 0.75rem;
+}
+
+.terms-toc a {
+  color: #555;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.terms-toc a:hover {
+  color: #3f51b5;
+}
+
+.terms-content section {
+  margin-bottom: 2.5rem;
+  scroll-margin-top: 2rem;
+}
+
+.terms-content h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #eee;
+}
+
+.terms-content h3 {
+  font-size: 1.2rem;
+  color: #444;
+  margin: 1.5rem 0 1rem;
+}
+
+.terms-content p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.terms-content ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.terms-content ul li {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.contact-info {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.contact-info li {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 0.75rem;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.contact-info li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #5c6bc0;
+}
+
+@media (max-width: 992px) {
+  .terms-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .terms-toc {
+    position: static;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .terms-header h1 {
+    font-size: 2rem;
+  }
+  
+  .terms-content h2 {
+    font-size: 1.3rem;
+  }
+  
+  .terms-content h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .terms-header h1 {
+    font-size: 1.8rem;
+  }
+  
+  .terms-toc h2 {
+    font-size: 1.2rem;
+  }
+  
+  .terms-content h2 {
+    font-size: 1.2rem;
+  }
+  
+  .terms-content h3 {
+    font-size: 1rem;
+  }
+}
