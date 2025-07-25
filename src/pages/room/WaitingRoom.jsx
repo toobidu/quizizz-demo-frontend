@@ -483,7 +483,24 @@ const WaitingRoom = ({ roomId }) => {
     };
   }, [actualRoomCode]);
 
-  // Xử lý khi đóng trình duyệt hoặc tải lại trang
+  // Đảm bảo luôn gọi leaveRoom khi đóng tab hoặc reload trình duyệt
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      try {
+        await roomsApi.leaveRoom(actualRoomCode);
+      } catch (e) {
+        // ignore
+      }
+    };
+    if (actualRoomCode) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+    return () => {
+      if (actualRoomCode) {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      }
+    };
+  }, [actualRoomCode]);
 
   // Chỉ chạy một lần khi component được mount
   useEffect(() => {
@@ -614,13 +631,28 @@ const WaitingRoom = ({ roomId }) => {
       sendMessage('request-players-update', { roomCode: actualRoomCode });
 
       // Gọi API rời phòng
-      const response = await roomsApi.leaveRoom(actualRoomCode);
+      await roomsApi.leaveRoom(actualRoomCode);
 
-      // Kiểm tra xem có nên xóa phòng không (nếu là host và chỉ có 1 người chơi)
-      if (isHost && players.length <= 1) {
+      // Gọi API lấy lại danh sách player sau khi rời phòng
+      const roomResponse = await roomsApi.getRoomByCode(actualRoomCode);
+      let playersLeft = [];
+      if (roomResponse && roomResponse.status === 200) {
+        const roomData = roomResponse.data;
+        const roomId = roomData.id || roomData.Id;
+        if (roomId) {
+          const playersResponse = await roomsApi.getPlayersInRoom(roomId);
+          if (playersResponse && playersResponse.status === 200) {
+            playersLeft = playersResponse.data || [];
+          }
+        }
+      }
+
+      // Nếu không còn ai trong phòng thì xóa phòng luôn
+      if (!playersLeft || playersLeft.length === 0) {
         try {
-          const deleteResponse = await roomsApi.deleteRoom(actualRoomCode);
+          await roomsApi.deleteRoom(actualRoomCode);
         } catch (deleteError) {
+          // Có thể log hoặc bỏ qua lỗi xóa phòng
         }
       }
 
