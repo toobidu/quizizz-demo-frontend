@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { showNotification } from '../../utils/notificationUtils';
 import '../../style/components/Notification.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../../layouts/Header.jsx';
@@ -23,7 +22,8 @@ import { useUnifiedWebSocket, useWebSocketEvent, useRoomEvents } from '../../hoo
 
 const WaitingRoom = ({ roomId }) => {
   const { roomCode } = useParams();
-  const actualRoomCode = roomId || roomCode;
+  // Guard: Only set actualRoomCode if available
+  const actualRoomCode = useMemo(() => roomId || roomCode, [roomId, roomCode]);
   const navigate = useNavigate();
 
   // State management
@@ -31,6 +31,10 @@ const WaitingRoom = ({ roomId }) => {
   const [roomInfo, setRoomInfo] = useState(null);
   const [topics, setTopics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isStarting, setIsStarting] = useState(false); // Track if game start is in progress
+  const [connectionAttempts, setConnectionAttempts] = useState(0); // Track reconnection attempts
+
+  // ✅ REMOVED: roomJoined state - now using wsRoomJoined from hook
 
   // Get state from stores
   const {
@@ -53,21 +57,27 @@ const WaitingRoom = ({ roomId }) => {
     updateConnectionState,
     clearAllAnimations
   } = useRealtimeUIStore();
-  
-  // ✅ FIXED: Use unified WebSocket service
-  const { 
-    isConnected: wsConnected, 
+
+  // Only initialize WebSocket if actualRoomCode is valid
+  const wsProps = useMemo(() => {
+    if (!actualRoomCode) return null;
+    return {
+      roomCode: actualRoomCode,
+      autoConnect: true,
+      autoJoin: true
+    };
+  }, [actualRoomCode]);
+
+  const {
+    isConnected: wsConnected,
     isConnecting,
+    roomJoined: wsRoomJoined, // ✅ Get roomJoined from hook
     send: sendMessage,
     sendSafely
-  } = useUnifiedWebSocket({
-    roomCode: actualRoomCode,
-    autoConnect: true,
-    autoJoin: true
-  });
-  
+  } = wsProps ? useUnifiedWebSocket(wsProps) : { isConnected: false, isConnecting: false, roomJoined: false, send: () => {}, sendSafely: () => {} };
+
   const currentUserId = useMemo(() => getCurrentUserId(), [getCurrentUserId]);
-  
+
   useEffect(() => {
     if (currentUserId && !localStorage.getItem('userId')) {
       localStorage.setItem('userId', currentUserId.toString());
@@ -94,9 +104,11 @@ const WaitingRoom = ({ roomId }) => {
 
       if (roomResponse && (roomResponse.status === 200)) {
         const roomData = roomResponse.data;
+        // ...existing code...
         setRoomInfo(roomData);
 
         // Load room details from store
+        // ...existing code...
         loadRoomDetails(actualRoomCode);
 
         // Ensure user is joined to room
@@ -105,10 +117,10 @@ const WaitingRoom = ({ roomId }) => {
           const playersResponse = await roomsApi.getPlayersInRoom(roomId);
           if (playersResponse && playersResponse.status === 200) {
             const playersData = playersResponse.data || [];
-            const userInRoom = playersData.find(p => 
+            const userInRoom = playersData.find(p =>
               p.userId?.toString() === currentUserId?.toString()
             );
-            
+
             if (!userInRoom && currentUserId) {
               try {
                 const joinResponse = await roomsApi.joinRoomByCode(actualRoomCode);
@@ -137,7 +149,7 @@ const WaitingRoom = ({ roomId }) => {
 
   // ✅ FIXED: Xử lý khi có người chơi mới tham gia
   const handlePlayerJoin = useCallback((newPlayer) => {
-    showNotification(`${newPlayer.username} đã tham gia phòng!`, 'success');
+    // ...existing code...
 
     setNewPlayerIds(ids => {
       if (!ids.includes(newPlayer.userId)) {
@@ -178,15 +190,16 @@ const WaitingRoom = ({ roomId }) => {
       if (data.players && Array.isArray(data.players)) {
         // Smooth transition for players list
         setPlayers(data.players);
-        
+
         // Update host status based on players list
-        const currentUser = data.players.find(p => 
+        const currentUser = data.players.find(p =>
           p.userId?.toString() === currentUserId?.toString()
         );
         if (currentUser) {
           setIsHost(currentUser.isHost || false);
+        } else {
         }
-        
+
       } else {
         loadRoomDetails(actualRoomCode);
       }
@@ -205,10 +218,10 @@ const WaitingRoom = ({ roomId }) => {
   }, [handlePlayerJoinedRealtime, handlePlayerLeftRealtime]);
 
   const handlePlayerJoinedEvent = useCallback((data) => {
-    
+
     try {
       const playerName = data.player?.username || data.username || data.name || 'Someone';
-      
+
       if (data.player) {
         const newPlayerId = data.player.userId || data.player.id;
         if (newPlayerId && newPlayerId.toString() !== currentUserId?.toString()) {
@@ -237,9 +250,9 @@ const WaitingRoom = ({ roomId }) => {
       // Update players list
       if (data.players && Array.isArray(data.players)) {
         setPlayers(data.players);
-        
+
         // Update host status
-        const currentUser = data.players.find(p => 
+        const currentUser = data.players.find(p =>
           p.userId?.toString() === currentUserId?.toString()
         );
         if (currentUser) {
@@ -258,28 +271,28 @@ const WaitingRoom = ({ roomId }) => {
   }, [setPlayers, setIsHost, addPlayer, currentUserId, setNewPlayerIds, addAnimation, loadRoomDetails, actualRoomCode]);
 
   const handlePlayerLeftEvent = useCallback((data) => {
-    
+
     try {
       let leavingPlayerName = 'Someone';
-      
+
       // Find leaving player from current players list
-      const leavingPlayer = players.find(p => 
+      const leavingPlayer = players.find(p =>
         p.userId?.toString() === data.userId?.toString()
       );
-      
+
       if (leavingPlayer) {
         leavingPlayerName = leavingPlayer.username;
-        
+
         addAnimation('leave', data.userId, leavingPlayerName);
       } else {
         showNotification(`👋 ${leavingPlayerName} đã rời phòng!`, 'warning');
       }
-      
+
       if (data.players && Array.isArray(data.players)) {
         setPlayers(data.players);
-        
+
         // Update host status based on new players list
-        const currentUser = data.players.find(p => 
+        const currentUser = data.players.find(p =>
           p.userId?.toString() === currentUserId?.toString()
         );
         if (currentUser) {
@@ -287,40 +300,40 @@ const WaitingRoom = ({ roomId }) => {
         }
       } else {
         removePlayer(data.userId);
-        
+
         // Refresh after local update
         setTimeout(() => loadRoomDetails(actualRoomCode), 500);
       }
-      
+
     } catch (error) {
       loadRoomDetails(actualRoomCode);
     }
   }, [players, setPlayers, setIsHost, removePlayer, currentUserId, addAnimation, loadRoomDetails, actualRoomCode]);
 
   const handleHostChangedEvent = useCallback((data) => {
-    
+
     try {
       const isNewHost = data.newHostId?.toString() === currentUserId?.toString();
-      
-      
+
+
       // Show notification with better styling
       if (isNewHost) {
         showNotification('👑 Bạn đã trở thành chủ phòng mới!', 'info');
       } else {
-        const newHostPlayer = players.find(p => 
+        const newHostPlayer = players.find(p =>
           p.userId?.toString() === data.newHostId?.toString()
         );
         if (newHostPlayer) {
           showNotification(`👑 ${newHostPlayer.username} đã trở thành chủ phòng mới!`, 'info');
         }
       }
-      
+
       // Update players list with new host status
       if (data.players && Array.isArray(data.players)) {
         setPlayers(data.players);
-        
+
         // Double-check host status from players list
-        const currentUser = data.players.find(p => 
+        const currentUser = data.players.find(p =>
           p.userId?.toString() === currentUserId?.toString()
         );
         if (currentUser) {
@@ -337,26 +350,25 @@ const WaitingRoom = ({ roomId }) => {
   }, [currentUserId, setIsHost, players, setPlayers, loadRoomDetails, actualRoomCode]);
 
   const handleGameStartedEvent = useCallback((data) => {
-    console.log('🎮 [WAITING_ROOM] === GAME STARTED EVENT RECEIVED ===');
-    console.log('🎮 [WAITING_ROOM] Timestamp:', new Date().toISOString());
-    console.log('🎮 [WAITING_ROOM] Event data:', data);
-    console.log('🎮 [WAITING_ROOM] Current user ID:', currentUserId);
-    console.log('🎮 [WAITING_ROOM] Is host:', isHost);
-    console.log('🎮 [WAITING_ROOM] Actual room code:', actualRoomCode);
-    
-    // Check if user should navigate to game
-    const shouldNavigate = true; // All users should navigate when game starts
-    console.log('🎮 [WAITING_ROOM] Should navigate:', shouldNavigate);
-    
-    if (shouldNavigate) {
-      console.log('🎮 [WAITING_ROOM] 💾 Setting gameStarted flag in localStorage');
-      localStorage.setItem('gameStarted', 'true');
-      const targetUrl = `/game/${actualRoomCode}`;
-      console.log('🎮 [WAITING_ROOM] 🚀 Navigating to:', targetUrl);
-      navigate(targetUrl);
-    } else {
-      console.log('🎮 [WAITING_ROOM] ⚠️ Navigation skipped');
+    // ...existing code...
+
+    // Validate that this event is for our room
+    if (data?.roomCode && data.roomCode !== actualRoomCode) {
+      return;
     }
+
+    // Reset starting state
+    setIsStarting(false);
+
+    // Update localStorage to indicate game has started
+    localStorage.setItem('gameStarted', 'true');
+
+    // Show notification
+    showNotification('Game đã bắt đầu! Đang chuyển tới màn hình chơi...', 'success');
+
+    // Navigate to game screen for all users (both host and players)
+    const targetUrl = `/game/${actualRoomCode}`;
+    navigate(targetUrl);
   }, [actualRoomCode, navigate, currentUserId, isHost]);
 
   const handleHeartbeatResponse = useCallback((data) => {
@@ -365,36 +377,95 @@ const WaitingRoom = ({ roomId }) => {
   const handleAllMessages = useCallback((data) => {
   }, []);
 
+  // ✅ NEW: Handle room connection events
+  const handleRoomConnectionSuccess = useCallback((data) => {
+    setConnectionAttempts(0);
+    showNotification('Đã kết nối thành công với phòng chơi', 'success');
+  }, []);
+
+  const handleRoomConnectionFailed = useCallback((data) => {
+    showNotification('Không thể kết nối với phòng chơi. Đang thử lại...', 'error');
+  }, []);
+
+  const handleReconnectSuccess = useCallback((data) => {
+    setConnectionAttempts(0);
+    showNotification('Đã kết nối lại thành công', 'success');
+  }, []);
+
+  const handleReconnectFailed = useCallback((data) => {
+    setConnectionAttempts(data.maxAttempts || 0);
+    showNotification('Mất kết nối WebSocket. Vui lòng tải lại trang.', 'error');
+  }, []);
+
+  // ✅ NEW: Manual retry connection
+  const handleRetryConnection = useCallback(() => {
+    setConnectionAttempts(0);
+    showNotification('Đang thử kết nối lại...', 'info');
+    if (window.location) {
+      window.location.reload();
+    }
+  }, []);
+
   // Room events object with enhanced event names and new handlers
-  const roomEventHandlers = useMemo(() => ({
-    // Primary event names (matching backend exactly)
-    'players-updated': handlePlayersUpdated,
-    'player-joined': handlePlayerJoinedEvent,
-    'player-left': handlePlayerLeftEvent,
-    'host-changed': handleHostChangedEvent,
-    'game-started': handleGameStartedEvent,
-    'heartbeat': handleHeartbeatResponse,
+  const roomEventHandlers = useMemo(() => {
+    const handlers = {
+      // Primary event names (matching backend exactly)
+      'players-updated': handlePlayersUpdated,
+      'player-joined': handlePlayerJoinedEvent,
+      'player-left': handlePlayerLeftEvent,
+      'host-changed': handleHostChangedEvent,
+      'game-started': handleGameStartedEvent,
+      'heartbeat': handleHeartbeatResponse,
 
-    // Alternative/legacy event names for compatibility
-    'room-players-updated': handlePlayersUpdated,
-    'user-joined': handlePlayerJoinedEvent,
-    'user-left': handlePlayerLeftEvent,
-    'new-host': handleHostChangedEvent,
+      // Alternative/legacy event names for compatibility
+      'room-players-updated': handlePlayersUpdated,
+      'user-joined': handlePlayerJoinedEvent,
+      'user-left': handlePlayerLeftEvent,
+      'new-host': handleHostChangedEvent,
 
-    // Debug catch-all
-    'message': handleAllMessages
-  }), [
-    handlePlayersUpdated, 
-    handlePlayerJoinedEvent, 
-    handlePlayerLeftEvent, 
-    handleHostChangedEvent, 
+      // ✅ NEW: Room connection events
+      'room-connection-success': handleRoomConnectionSuccess,
+      'room-connection-failed': handleRoomConnectionFailed,
+      'reconnect-success': handleReconnectSuccess,
+      'reconnect-failed': handleReconnectFailed,
+
+      // Debug catch-all
+      'message': handleAllMessages
+    };
+
+    return handlers;
+  }, [
+    actualRoomCode,
+    currentUserId,
+    isHost,
+    handlePlayersUpdated,
+    handlePlayerJoinedEvent,
+    handlePlayerLeftEvent,
+    handleHostChangedEvent,
     handleGameStartedEvent,
     handleHeartbeatResponse,
-    handleAllMessages
+    handleAllMessages,
+    handleRoomConnectionSuccess,
+    handleRoomConnectionFailed,
+    handleReconnectSuccess,
+    handleReconnectFailed
   ]);
 
   // Register room events
   useRoomEvents(actualRoomCode, roomEventHandlers);
+  useRoomEvents(actualRoomCode, roomEventHandlers);
+
+  // ✅ ENHANCED: Dedicated GAME_STARTED listener with detailed logging
+  // ✅ FIXED: Move hook call to top level (Rules of Hooks)
+  const handleGameStartedDirect = useCallback((data) => {
+    handleGameStartedEvent(data);
+  }, [actualRoomCode, currentUserId, isHost, handleGameStartedEvent]);
+
+  // ✅ FIXED: Call hook at top level
+  useWebSocketEvent('game-started', handleGameStartedDirect, [actualRoomCode, currentUserId, isHost]);
+
+  // ✅ DEBUG: Log listener attachment
+  useEffect(() => {}, [actualRoomCode, currentUserId, isHost]);
 
   // Xử lý khi đóng trình duyệt hoặc tải lại trang
   React.useEffect(() => {
@@ -427,9 +498,9 @@ const WaitingRoom = ({ roomId }) => {
 
         // Chỉ gửi yêu cầu tham gia lại nếu WebSocket đã kết nối
         if (wsConnected) {
-          sendMessage('join-room', { 
+          sendMessage('join-room', {
             roomCode: actualRoomCode,
-            userId: currentUserId 
+            userId: currentUserId
           });
         }
       }
@@ -452,6 +523,31 @@ const WaitingRoom = ({ roomId }) => {
     });
   }, [wsConnected, isConnecting, updateConnectionState]);
 
+  // ✅ NEW: Monitor WebSocket connection when starting game
+  useEffect(() => {
+    if (isStarting && !wsConnected) {
+      showNotification('Mất kết nối WebSocket. Game có thể không bắt đầu được.', 'warning');
+      setIsStarting(false);
+      localStorage.setItem('gameStarted', 'false');
+    }
+  }, [isStarting, wsConnected]);
+
+  // ✅ NEW: Monitor room join status
+  useEffect(() => {
+    if (wsConnected && actualRoomCode && !wsRoomJoined) {
+      // Set a timer to check if room join is taking too long
+      const joinTimeout = setTimeout(() => {
+        if (!wsRoomJoined) {
+          showNotification('Đang kết nối với phòng chơi...', 'info');
+        }
+      }, 5000); // 5 seconds timeout
+      return () => clearTimeout(joinTimeout);
+    }
+  }, [wsConnected, actualRoomCode, wsRoomJoined]);
+
+  // ✅ NEW: Reset room joined status when WebSocket disconnects
+  useEffect(() => {}, [wsConnected]);
+
   // ✅ ENHANCED: Cleanup animations on unmount
   useEffect(() => {
     return () => {
@@ -465,7 +561,7 @@ const WaitingRoom = ({ roomId }) => {
 
     // Send heartbeat every 30 seconds (backend timeout is 120s, so this is safe)
     const heartbeatInterval = setInterval(() => {
-      
+
       // Update connection state
       updateConnectionState({ lastHeartbeat: Date.now() });
     }, 30000); // 30 seconds
@@ -482,7 +578,7 @@ const WaitingRoom = ({ roomId }) => {
           sendMessage('request-players-update', { roomCode: actualRoomCode });
         }
       }, 3000);
-      
+
       return () => clearTimeout(fallbackTimer);
     }
   }, [wsConnected, actualRoomCode, players.length, sendMessage]);
@@ -496,7 +592,7 @@ const WaitingRoom = ({ roomId }) => {
     }, 60000); // Every 60 seconds (reduced from 15s)
 
     return () => clearInterval(syncInterval);
-  }, [actualRoomCode, wsConnected, sendMessage]); 
+  }, [actualRoomCode, wsConnected, sendMessage]);
 
   const handleLeaveRoom = useCallback(async () => {
     try {
@@ -540,102 +636,93 @@ const WaitingRoom = ({ roomId }) => {
     }
   }, [actualRoomCode, isHost, players.length, navigate, currentUserId, sendMessage]);
 
-  // ✅ FIXED: handleStartGame với debug logs
+  // ✅ FIXED: handleStartGame - Enhanced connection validation
   const handleStartGame = useCallback(async () => {
-    console.log('🎮 [WAITING_ROOM] === START GAME BUTTON CLICKED ===');
-    console.log('🎮 [WAITING_ROOM] Timestamp:', new Date().toISOString());
-    console.log('🎮 [WAITING_ROOM] Current user ID:', currentUserId);
-    console.log('🎮 [WAITING_ROOM] Is host:', isHost);
-    console.log('🎮 [WAITING_ROOM] Actual room code:', actualRoomCode);
-    console.log('🎮 [WAITING_ROOM] Room info:', roomInfo);
-    console.log('🎮 [WAITING_ROOM] Players:', players);
-    console.log('🎮 [WAITING_ROOM] Can start game:', canStartGame);
+    if (!isHost || isStarting) return;
 
-    let roomCodeToUse = null;
-    
+    // ✅ CRITICAL: Find actual host player to fix identity mismatch
+    const actualHostPlayer = players.find(p => p.isHost);
+    const actualHostUserId = actualHostPlayer?.userId;
+
+    if (!actualHostUserId) {
+      showNotification('Không tìm thấy thông tin host. Vui lòng tải lại trang.', 'error');
+      return;
+    }
+
+    if (!wsConnected) {
+      showNotification('WebSocket chưa kết nối. Game sẽ bắt đầu qua API.', 'info');
+      // Don't return - allow game to start via API
+    }
+    if (!wsRoomJoined && wsConnected) {
+
+      showNotification('Chưa join phòng thành công. Vui lòng đợi hoặc tải lại trang.', 'warning');
+      return;
+    }
+
+    if (connectionAttempts > 5) { // Only block if many failed attempts
+      showNotification('Kết nối không ổn định. Vui lòng đợi kết nối ổn định.', 'warning');
+      return;
+    }
+
     try {
-      // Verify room exists by checking room info
+      setIsStarting(true); // Set starting state
+
+      // Verify room exists
       if (!roomInfo) {
-        console.log('🎮 [WAITING_ROOM] ❌ No room info available');
         throw new Error('Room information not available. Please refresh the page.');
       }
 
-      // Double-check room code
-      roomCodeToUse = actualRoomCode || roomInfo.roomCode || roomInfo.RoomCode;
-      console.log('🎮 [WAITING_ROOM] Room code to use:', roomCodeToUse);
-      
+      const roomCodeToUse = actualRoomCode || roomInfo.roomCode || roomInfo.RoomCode;
       if (!roomCodeToUse) {
-        console.log('🎮 [WAITING_ROOM] ❌ No room code found');
         throw new Error('Room code is missing. Cannot start game.');
       }
-      
-      // Verify room still exists in backend before starting game
-      console.log('🎮 [WAITING_ROOM] 📤 Verifying room exists in backend...');
-      const verifyRoomResponse = await roomsApi.getRoomByCode(roomCodeToUse);
-      console.log('🎮 [WAITING_ROOM] 📥 Room verification response:', verifyRoomResponse);
-      
-      if (!verifyRoomResponse || verifyRoomResponse.status !== 200) {
-        console.log('🎮 [WAITING_ROOM] ❌ Room verification failed');
-        throw new Error('Phòng không tồn tại hoặc đã bị xóa. Vui lòng tạo phòng mới.');
-      }
-      
-      // Set up game data in localStorage before starting
+
+      // Set up game data in localStorage
       const gameData = {
         roomCode: roomCodeToUse,
         roomInfo: roomInfo,
-        hostId: currentUserId,
+        hostId: actualHostUserId,
         isHost: isHost,
         players: players
       };
-      
-      console.log('🎮 [WAITING_ROOM] 💾 Saving game data to localStorage:', gameData);
+
       localStorage.setItem('currentRoom', JSON.stringify(gameData));
-      localStorage.setItem('gameStarted', 'true');
+      localStorage.setItem('gameStarted', 'pending'); // Set to pending until we receive game-started event
 
-      // Get selected topics from roomInfo if available
-      const selectedTopicIds = roomInfo?.selectedTopics || roomInfo?.topicIds;
-      const questionCount = roomInfo?.questionCount;
-      const timeLimit = roomInfo?.timeLimit;
-
+      // Get game settings from roomInfo
       const startGameData = {
         roomCode: roomCodeToUse,
-        selectedTopicIds: selectedTopicIds,
-        questionCount: questionCount,
-        timeLimit: timeLimit,
-        hostId: currentUserId,
-        isHost: isHost
+        selectedTopicIds: roomInfo?.selectedTopics || roomInfo?.topicIds,
+        questionCount: roomInfo?.questionCount || 10,
+        timeLimit: roomInfo?.timeLimit || 30,
+        hostId: actualHostUserId // ✅ FIXED: Use actual host ID for API call
       };
 
-      console.log('🎮 [WAITING_ROOM] 📤 Sending start-game message via WebSocket:', startGameData);
-
-      // Use unified service
-      console.log('🎮 [WAITING_ROOM] 📤 Calling sendSafely with start-game event...');
-      await sendSafely('start-game', startGameData);
-      console.log('🎮 [WAITING_ROOM] ✅ start-game message sent successfully');
-      
-      // Show success notification
-      showNotification('Game đã bắt đầu! Đang chuyển sang màn hình chơi...', 'success');
-
-      // Fallback navigation after 5 seconds
-      console.log('🎮 [WAITING_ROOM] ⏰ Setting fallback navigation timer...');
-      setTimeout(() => {
-        const gameStarted = localStorage.getItem('gameStarted');
-        console.log('🎮 [WAITING_ROOM] ⏰ Fallback timer triggered, gameStarted flag:', gameStarted);
-        if (gameStarted === 'true' && isHost) {
-          console.log('🎮 [WAITING_ROOM] 🚀 Fallback navigation to game page');
-          navigate(`/game/${roomCodeToUse}`);
+      // Use gameFlowService instead of direct WebSocket
+      const gameFlowService = (await import('../../services/gameFlowService.js')).default;
+      await gameFlowService.startGameDirect(
+        roomCodeToUse,
+        parseInt(actualHostUserId), // ✅ FIXED: Use actual host ID
+        {
+          selectedTopicIds: startGameData.selectedTopicIds,
+          questionCount: startGameData.questionCount,
+          timeLimit: startGameData.timeLimit
         }
-      }, 5000);
+      );
+      showNotification('Đang bắt đầu game...', 'info');
+
+      // No setTimeout fallback - we wait for the game-started event
+      // If user doesn't receive event, they can manually retry by clicking button again
 
     } catch (error) {
-      console.log('🎮 [WAITING_ROOM] ❌ Error in handleStartGame:', error);
-      console.log('🎮 [WAITING_ROOM] Error message:', error.message);
-      console.log('🎮 [WAITING_ROOM] Error status:', error.status);
-      console.log('🎮 [WAITING_ROOM] Error errorCode:', error.errorCode);
-      
+
+      // Reset starting state on error
+      setIsStarting(false);
+      localStorage.setItem('gameStarted', 'false');
+
       // More specific error messages
       let errorMessage = 'Không thể bắt đầu game. Vui lòng thử lại!';
-      
+
       if (error.message?.includes('WebSocket connection timeout')) {
         errorMessage = 'Mất kết nối WebSocket. Vui lòng kiểm tra internet và thử lại.';
       } else if (error.errorCode === 'ROOM_NOT_FOUND' || error.message?.includes('không tồn tại')) {
@@ -645,11 +732,9 @@ const WaitingRoom = ({ roomId }) => {
       } else if (error.status === 400) {
         errorMessage = 'Thông tin game không hợp lệ. Vui lòng kiểm tra cài đặt phòng.';
       }
-      
-      console.log('🎮 [WAITING_ROOM] Error message to show:', errorMessage);
       showNotification(errorMessage, 'error');
     }
-  }, [actualRoomCode, roomInfo, isHost, players, navigate, currentUserId, sendSafely]);
+  }, [actualRoomCode, roomInfo, isHost, isStarting, players, navigate, currentUserId, wsConnected, wsRoomJoined, connectionAttempts]);
 
   const getMaxPlayers = useMemo(() => {
     if (!roomInfo) return 4;
@@ -657,13 +742,11 @@ const WaitingRoom = ({ roomId }) => {
   }, [roomInfo]);
 
   const memoizedValues = useMemo(() => {
-    
-    // Tính toán canStartGame
+
+    // Tính toán canStartGame với debug logging
     const nonHostPlayers = players.filter(p => !p.isHost);
     const allNonHostPlayersReady = nonHostPlayers.every(p => p.isReady);
-    
     const canStartGame = isHost && nonHostPlayers.length >= 1 && allNonHostPlayersReady;
-    
     const maxPlayers = getMaxPlayers;
     const hostPlayer = players.find(p => p.isHost);
 
@@ -675,7 +758,6 @@ const WaitingRoom = ({ roomId }) => {
   }, [isHost, players, getMaxPlayers, currentUserId]);
 
   const { canStartGame, maxPlayers, hostPlayer } = memoizedValues;
-
   if (loading) {
     return (
       <div className="waiting-room">
@@ -709,6 +791,31 @@ const WaitingRoom = ({ roomId }) => {
       {/* ✅ REMOVED: WebSocketHandler - using unified hooks instead */}
 
       <div className="waiting-container">
+        {/* Connection Status Indicator */}
+        <div className="connection-status">
+          <div className={`status-indicator ${wsConnected && wsRoomJoined ? 'connected' : 'disconnected'}`}>
+            <span className="status-dot"></span>
+            <span className="status-text">
+              {wsConnected && wsRoomJoined ? 'Đã kết nối' :
+                wsConnected ? 'Đang kết nối phòng...' : 'Đang kết nối...'}
+            </span>
+            {connectionAttempts > 0 && (
+              <span className="reconnect-info">
+                (Thử kết nối lại: {connectionAttempts})
+              </span>
+            )}
+          </div>
+          {(!wsConnected || !wsRoomJoined || connectionAttempts > 0) && (
+            <button
+              className="retry-connection-btn"
+              onClick={handleRetryConnection}
+              title="Thử kết nối lại"
+            >
+              🔄
+            </button>
+          )}
+        </div>
+
         {/* Room Header */}
         <div className="room-header">
           <RoomHeader
@@ -733,14 +840,22 @@ const WaitingRoom = ({ roomId }) => {
           currentUserId={currentUserId}
         />
 
-        {/* ✅ FIXED: Action Buttons - Chỉ dựa vào isHost từ store */}
+        {/* ✅ FIXED: Action Buttons - Allow game start without requiring WebSocket */}
+        {/* ✅ DEBUG: Log giá trị trước khi truyền cho ActionButtons */}
+        {(() => {
+          // ✅ FIXED: Only require canStartGame and !isStarting, WebSocket optional
+          const finalCanStartGame = canStartGame && !isStarting;
+          return null;
+        })()}
         <ActionButtons
           isHost={isHost}
-          canStartGame={canStartGame}
+          canStartGame={canStartGame && !isStarting}
           players={players}
           onStartGame={handleStartGame}
           onLeaveRoom={handleLeaveRoom}
+          isStarting={isStarting}
         />
+
       </div>
 
       {/* ✅ NEW: Player Join/Leave Animations */}

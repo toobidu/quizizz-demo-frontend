@@ -35,21 +35,14 @@ const useGameState = (roomCode, isHost) => {
     // Lắng nghe các sự kiện game
     useEffect(() => {
         if (!roomCode) return;
-
-        console.log('🎮 [USE_GAME_STATE] === SETTING UP EVENT LISTENERS ===');
-        console.log('🎮 [USE_GAME_STATE] Room code:', roomCode);
-        console.log('🎮 [USE_GAME_STATE] Timestamp:', new Date().toISOString());
-
         // Xử lý sự kiện countdown
         const handleCountdown = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 🕐 COUNTDOWN event received:', data);
             setCountdownValue(data.value || data.countdownValue);
             setGameState('countdown');
         };
 
         // Xử lý sự kiện game bắt đầu
         const handleGameStarted = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 🚀 GAME_STARTED event received:', data);
             setGameState('playing');
             setCountdownValue(null);
             setTotalQuestions(data.totalQuestions);
@@ -58,7 +51,6 @@ const useGameState = (roomCode, isHost) => {
 
         // Xử lý sự kiện câu hỏi mới
         const handleNewQuestion = (data) => {
-            console.log('🎮 [USE_GAME_STATE] ❓ NEW_QUESTION event received:', data);
             setCurrentQuestion(data.question);
             setQuestionIndex(data.questionIndex);
             setTimeRemaining(data.timeRemaining);
@@ -67,26 +59,22 @@ const useGameState = (roomCode, isHost) => {
 
         // Xử lý sự kiện cập nhật thời gian
         const handleTimerUpdate = (data) => {
-            console.log('🎮 [USE_GAME_STATE] ⏰ TIMER_UPDATE event received:', data);
             setTimeRemaining(data.timeRemaining);
         };
 
         // Xử lý sự kiện cập nhật tiến độ
         const handleProgressUpdate = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 📊 PROGRESS_UPDATE event received:', data);
             setPlayerProgress(data);
         };
 
         // Xử lý sự kiện game kết thúc
         const handleGameEnded = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 🏁 GAME_ENDED event received:', data);
             setGameState('ended');
             setGameResults(data.finalResults);
         };
 
         // Xử lý sự kiện trạng thái người chơi thay đổi
         const handlePlayerStatusChanged = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 👤 PLAYER_STATUS_CHANGED event received:', data);
             setPlayers(prevPlayers => prevPlayers.map(player => player.userId === data.userId ? {
                 ...player,
                 isReady: data.status === 'ready'
@@ -95,14 +83,12 @@ const useGameState = (roomCode, isHost) => {
 
         // Xử lý sự kiện cập nhật danh sách người chơi
         const handlePlayersUpdated = (data) => {
-            console.log('🎮 [USE_GAME_STATE] 👥 PLAYERS_UPDATED event received:', data);
             if (data.players) {
                 setPlayers(data.players);
             }
         };
 
         // Đăng ký lắng nghe các sự kiện
-        console.log('🎮 [USE_GAME_STATE] 📝 Registering event listeners...');
         eventEmitter.on('countdown', handleCountdown);
         eventEmitter.on('game-started', handleGameStarted);
         eventEmitter.on('new-question', handleNewQuestion);
@@ -111,11 +97,9 @@ const useGameState = (roomCode, isHost) => {
         eventEmitter.on('game-ended', handleGameEnded);
         eventEmitter.on('player-status-changed', handlePlayerStatusChanged);
         eventEmitter.on('room-players-updated', handlePlayersUpdated);
-        console.log('🎮 [USE_GAME_STATE] ✅ Event listeners registered');
 
         // Cleanup khi unmount
         return () => {
-            console.log('🎮 [USE_GAME_STATE] 🧹 Cleaning up event listeners...');
             eventEmitter.off('countdown', handleCountdown);
             eventEmitter.off('game-started', handleGameStarted);
             eventEmitter.off('new-question', handleNewQuestion);
@@ -124,7 +108,6 @@ const useGameState = (roomCode, isHost) => {
             eventEmitter.off('game-ended', handleGameEnded);
             eventEmitter.off('player-status-changed', handlePlayerStatusChanged);
             eventEmitter.off('room-players-updated', handlePlayersUpdated);
-            console.log('🎮 [USE_GAME_STATE] ✅ Event listeners cleaned up');
         };
     }, [roomCode]);
 

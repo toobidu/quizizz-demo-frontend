@@ -1,6 +1,8 @@
 /**
  * Utility functions for room store
  */
+import { ensureUsername } from '../../utils/usernameUtils.js';
+
 const roomUtils = (set, get) => ({
     // Get current user ID from token
     getCurrentUserId: () => {
@@ -20,17 +22,8 @@ const roomUtils = (set, get) => ({
 
     // Get current username from token
     getCurrentUsername: () => {
-        try {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                const username = payload.username || payload.name || payload.Name;
-                return username;
-            }
-        } catch (error) {
-            
-        }
-        return null;
+        // ✅ ENHANCED: Use username utility for guaranteed username
+        return ensureUsername();
     }
 });
 

@@ -10,7 +10,7 @@ import MainPage from "../pages/MainPage";
 import Profile from "../pages/Profile";
 import RoomsPage from "../pages/room/RoomsPage.jsx";
 import WaitingRoom from "../pages/room/WaitingRoom.jsx";
-import QuizGamePage from "../pages/room/QuizGamePage.jsx";
+import GamePage from "../pages/room/GamePage.jsx";
 import EnhancedGamePage from "../pages/EnhancedGamePage.jsx";
 import AboutPage from "../pages/footer/AboutPage.jsx";
 import GamesPage from "../pages/footer/GamesPage.jsx";
@@ -115,7 +115,7 @@ const protectedRoutes = [{
     }, {
         path: "/waiting-room/:roomCode", element: <WaitingRoom/>,
     }, {
-        path: "/game/:roomCode", element: <QuizGamePage/>,
+        path: "/game/:roomCode", element: <GamePage/>,
     }, {
         path: "/enhanced-game/:roomCode", element: <EnhancedGamePage/>,
     },];

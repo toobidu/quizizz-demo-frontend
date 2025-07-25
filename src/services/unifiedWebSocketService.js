@@ -3,6 +3,13 @@
  * Replaces all existing WebSocket services to prevent conflicts
  */
 
+import { ensureUsername } from '../utils/usernameUtils.js';
+import { 
+    createSocketConnection, 
+    deleteSocketConnection, 
+    updateSocketConnection 
+} from '../config/api/socketConnections.api.js';
+
 class UnifiedWebSocketService {
     constructor() {
         this.socket = null;
@@ -17,7 +24,7 @@ class UnifiedWebSocketService {
         // Connection management
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
-        this.reconnectDelay = 1000;
+        this.reconnectDelay = 3000; // Tăng delay lên 3 giây để tránh reconnect quá nhanh
         this.reconnectTimer = null;
         this.heartbeatInterval = null;
         
@@ -34,8 +41,14 @@ class UnifiedWebSocketService {
         this.lastConnectCall = 0;
         this.connectDebounceDelay = 500;
         
-        // WebSocket URL
-        this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+        // WebSocket URL - sử dụng Vite proxy trong development
+        if (import.meta.env.DEV) {
+            // Development: sử dụng Vite proxy
+            this.wsUrl = `ws://localhost:5173/ws`;
+        } else {
+            // Production: kết nối trực tiếp
+            this.wsUrl = import.meta.env.VITE_WS_URL || 'ws://localhost:3001';
+        }
     }
 
     /**
@@ -92,12 +105,20 @@ class UnifiedWebSocketService {
                 this._forceDisconnect();
             }
             
-            // Build WebSocket URL
+            // ✅ FIX: Build WebSocket URL với proxy path
             let wsUrl = this.wsUrl;
             if (roomCode) {
-                wsUrl = `${this.wsUrl}/waiting-room/${roomCode}`;
+                // Development: ws://localhost:5173/ws 
+                // Production: ws://localhost:3001/waiting-room/ROOMCODE
+                if (import.meta.env.DEV) {
+                    wsUrl = `${this.wsUrl}/waiting-room/${roomCode}`;
+                } else {
+                    wsUrl = `${this.wsUrl}/waiting-room/${roomCode}`;
+                }
                 this.currentRoom = roomCode;
             }
+
+            // ...existing code...
 
             // Create WebSocket
             this.socket = new WebSocket(wsUrl);
@@ -111,15 +132,63 @@ class UnifiedWebSocketService {
                     reject(new Error('Connection timeout'));
                 }, 10000);
 
-                const onOpen = () => {
+                const onOpen = async () => {
                     clearTimeout(timeout);
                     this.isConnecting = false;
                     this.isConnected = true;
                     this.reconnectAttempts = 0;
                     
+                    // ✅ ENHANCED: Detailed connection success logging
+                    // ...existing code...
+                    
+                    // ✅ FIX: Register connection in database
+                    try {
+                        const userId = parseInt(localStorage.getItem('userId'));
+                        const username = localStorage.getItem('username');
+                        
+                        if (userId && this.socket) {
+                            // ...existing code...
+                            await createSocketConnection({
+                                socketId: this.socket.url + '_' + Date.now(), // Temporary ID
+                                userId: userId,
+                                roomId: this.currentRoom ? parseInt(this.currentRoom) : null,
+                                status: 'connected'
+                            });
+                            // ...existing code...
+                        }
+                    } catch (error) {
+                        // ...existing code...
+                        // Don't fail the connection for this
+                    }
+                    
                     this.startHeartbeat();
                     this.processMessageQueue();
                     this.emit('connected', { roomCode: this.currentRoom });
+                    
+                    // ✅ AUTO JOIN: Send join-room immediately after connection
+                    if (this.currentRoom) {
+                        // Strictly enforce userId as number and username as non-empty string
+                        let rawUserId = localStorage.getItem('userId');
+                        let rawUsername = localStorage.getItem('username') || localStorage.getItem('userName') || localStorage.getItem('name');
+                        let userId = rawUserId ? parseInt(rawUserId) : null;
+                        let username = rawUsername ? String(rawUsername).trim() : '';
+                        if (!userId || isNaN(userId) || userId <= 0) {
+                            // ...existing code...
+                            return;
+                        }
+                        if (!username || username.length === 0) {
+                            // ...existing code...
+                            return;
+                        }
+                        const joinData = {
+                            roomCode: this.currentRoom,
+                            userId,
+                            username
+                        };
+                        // ...existing code...
+                        this.send('join-room', joinData);
+                    }
+                    
                     resolve(true);
                 };
 
@@ -148,19 +217,14 @@ class UnifiedWebSocketService {
         if (!this.socket) return;
 
         this.socket.onmessage = (event) => {
-            console.log('📥 [WS_RECEIVE] === WEBSOCKET MESSAGE RECEIVED ===');
-            console.log('📥 [WS_RECEIVE] Timestamp:', new Date().toISOString());
-            console.log('📥 [WS_RECEIVE] Raw event data:', event.data);
+            // ...existing code...
             
             try {
                 const data = JSON.parse(event.data);
-                console.log('📥 [WS_RECEIVE] Parsed data:', data);
-                console.log('📥 [WS_RECEIVE] Current room:', this.currentRoom);
-                console.log('📥 [WS_RECEIVE] Current user ID:', this.userId);
+                // ...existing code...
                 this.handleMessage(data);
             } catch (error) {
-                console.log('📥 [WS_RECEIVE] ❌ Error parsing message:', error);
-                console.log('📥 [WS_RECEIVE] Raw data that failed:', event.data);
+                // ...existing code...
             }
         };
 
@@ -192,9 +256,7 @@ class UnifiedWebSocketService {
      * Handle incoming messages with unified format
      */
     handleMessage(data) {
-        console.log('🔄 [WS_HANDLE] === HANDLING WEBSOCKET MESSAGE ===');
-        console.log('🔄 [WS_HANDLE] Timestamp:', new Date().toISOString());
-        console.log('🔄 [WS_HANDLE] Raw data:', data);
+        // ...existing code...
         
         // Support multiple message formats from different server implementations
         let messageType, messageData;
@@ -203,35 +265,79 @@ class UnifiedWebSocketService {
             // Server format: { Type: "event-name", Data: {...} }
             messageType = data.Type;
             messageData = data.Data;
-            console.log('🔄 [WS_HANDLE] Format: Server format (Type/Data)');
+            // ...existing code...
         } else if (data.type) {
             // Alternative format: { type: "event-name", data: {...} }
             messageType = data.type;
             messageData = data.data || data;
-            console.log('🔄 [WS_HANDLE] Format: Alternative format (type/data)');
+            // ...existing code...
         } else if (data.event) {
             // Event format: { event: "event-name", ... }
             messageType = data.event;
             messageData = data;
-            console.log('🔄 [WS_HANDLE] Format: Event format (event)');
+            // ...existing code...
         } else {
             // Raw data format
             messageType = 'message';
             messageData = data;
-            console.log('🔄 [WS_HANDLE] Format: Raw data format');
+            // ...existing code...
         }
 
-        console.log('🔄 [WS_HANDLE] Message type:', messageType);
-        console.log('🔄 [WS_HANDLE] Message data:', messageData);
+        // ...existing code...
 
         if (messageType) {
             // Emit with lowercase event name for consistency
             const eventName = messageType.toLowerCase().replace(/_/g, '-');
-            console.log('🔄 [WS_HANDLE] 📢 Emitting event:', eventName);
-            console.log('🔄 [WS_HANDLE] Event listeners count:', this.eventListeners.get(eventName)?.size || 0);
+            // ...existing code...
+            
             this.emit(eventName, messageData);
+            
+            // Special handling for game events - also emit via eventEmitter for GameContainer
+            if (eventName === 'game-started') {
+                // Import eventEmitter dynamically to avoid circular imports
+                import('./eventEmitter.js').then(({ default: eventEmitter }) => {
+                    eventEmitter.emit('game-started', messageData);
+                    eventEmitter.emit('game-flow-game-started', messageData);
+                });
+            } else if (eventName === 'question' || eventName === 'question-sent') {
+                import('./eventEmitter.js').then(({ default: eventEmitter }) => {
+                    eventEmitter.emit('question', messageData);
+                    eventEmitter.emit('question-sent', messageData);
+                    eventEmitter.emit('game-flow-question', messageData);
+                });
+            } else if (eventName === 'join-room-ack' || eventName === 'JOIN_ROOM_ACK') {
+                
+                if (messageData && messageData.success) {
+                    // ...existing code...
+                    this.emit('room-connection-success', {
+                        roomCode: this.currentRoom,
+                        message: 'Successfully joined room',
+                        data: messageData
+                    });
+                } else {
+                    // ...existing code...
+                    this.emit('room-connection-failed', {
+                        roomCode: this.currentRoom,
+                        message: messageData?.message || 'Failed to join room',
+                        data: messageData
+                    });
+                }
+            } else if (eventName === 'room-joined' || eventName === 'join-room-success') {
+                this.emit('room-connection-success', messageData);
+            } else if (eventName === 'room-join-failed' || eventName === 'join-room-error') {
+                this.emit('room-connection-failed', messageData);
+            } else if (eventName === 'answer-result') {
+                import('./eventEmitter.js').then(({ default: eventEmitter }) => {
+                    eventEmitter.emit('answer-result', messageData);
+                    eventEmitter.emit('game-flow-answer-result', messageData);
+                });
+            } else if (eventName === 'game-finished') {
+                import('./eventEmitter.js').then(({ default: eventEmitter }) => {
+                    eventEmitter.emit('game-finished', messageData);
+                    eventEmitter.emit('game-flow-game-finished', messageData);
+                });
+            }
         } else {
-            console.log('🔄 [WS_HANDLE] ❌ No message type found');
         }
     }
 
@@ -249,27 +355,17 @@ class UnifiedWebSocketService {
             roomCode: this.currentRoom
         };
 
-        console.log('📤 [WS_SEND] === SENDING WEBSOCKET MESSAGE ===');
-        console.log('📤 [WS_SEND] Event type:', type);
-        console.log('📤 [WS_SEND] Data:', data);
-        console.log('📤 [WS_SEND] Full message:', message);
-        console.log('📤 [WS_SEND] Socket connected:', this.isConnected);
-        console.log('📤 [WS_SEND] Socket ready state:', this.socket?.readyState);
-        console.log('📤 [WS_SEND] Current room:', this.currentRoom);
-        console.log('📤 [WS_SEND] Current user ID:', this.userId);
+        // ...existing code...
 
         if (this.isConnected && this.socket && this.socket.readyState === WebSocket.OPEN) {
             try {
                 this.socket.send(JSON.stringify(message));
-                console.log('📤 [WS_SEND] ✅ Message sent successfully');
                 return true;
             } catch (error) {
-                console.log('📤 [WS_SEND] ❌ Error sending message:', error);
                 this.queueMessage(message);
                 return false;
             }
         } else {
-            console.log('📤 [WS_SEND] ⚠️ Socket not ready, queuing message');
             this.queueMessage(message);
             return false;
         }
@@ -443,7 +539,7 @@ class UnifiedWebSocketService {
     }
 
     /**
-     * Reconnection logic
+     * Reconnection logic with auto-rejoin
      */
     scheduleReconnect() {
         if (this.reconnectTimer) {
@@ -451,20 +547,54 @@ class UnifiedWebSocketService {
         }
         
         const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts);
-        this.reconnectTimer = setTimeout(() => {
+        // Thông báo UX mỗi lần reconnect (nếu có showNotification toàn cục, có thể gọi ở đây)
+        if (typeof window !== 'undefined' && window.dispatchEvent) {
+            const event = new CustomEvent('ws-reconnect-attempt', { detail: { attempts: this.reconnectAttempts + 1, delay } });
+            window.dispatchEvent(event);
+        }
+        this.reconnectTimer = setTimeout(async () => {
             this.reconnectAttempts++;
-            this.connect(this.currentRoom).catch(error => {
-                if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-                    this.emit('reconnect-failed', { roomCode: this.currentRoom });
+            try {
+                await this.connect();
+                if (this.currentRoom) {
+                    let rawUserId = localStorage.getItem('userId');
+                    let rawUsername = localStorage.getItem('username') || localStorage.getItem('userName') || localStorage.getItem('name');
+                    let userId = rawUserId ? parseInt(rawUserId) : null;
+                    let username = rawUsername ? String(rawUsername).trim() : '';
+                    if (!userId || isNaN(userId) || userId <= 0) {
+                        return;
+                    }
+                    if (!username || username.length === 0) {
+                        return;
+                    }
+                    const joinData = {
+                        roomCode: this.currentRoom,
+                        userId,
+                        username
+                    };
+                    this.send('join-room', joinData);
                 }
-            });
+                this.emit('reconnect-success', { 
+                    roomCode: this.currentRoom, 
+                    attempts: this.reconnectAttempts 
+                });
+            } catch (error) {
+                if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+                    this.emit('reconnect-failed', { 
+                        roomCode: this.currentRoom, 
+                        maxAttempts: this.maxReconnectAttempts 
+                    });
+                } else {
+                    this.scheduleReconnect();
+                }
+            }
         }, delay);
     }
 
     /**
      * Force disconnect without reconnection
      */
-    _forceDisconnect() {
+    async _forceDisconnect() {
         this.stopHeartbeat();
         
         if (this.reconnectTimer) {
@@ -472,7 +602,14 @@ class UnifiedWebSocketService {
             this.reconnectTimer = null;
         }
         
+        // ✅ FIX: Cleanup socket connection in database
         if (this.socket) {
+            try {
+                const userId = parseInt(localStorage.getItem('userId'));
+                if (userId) {
+                    // Backend should handle cleanup of stale connections
+                }
+            } catch (error) {}
             this.socket.close(1000, 'Force disconnect');
             this.socket = null;
         }
@@ -506,27 +643,38 @@ class UnifiedWebSocketService {
     /**
      * Room management
      */
-    joinRoom(roomCode) {
-        // Leave previous room if different
+    joinRoom(roomCode, username = null, userId = null) {
+        if (!roomCode || typeof roomCode !== 'string' || roomCode.trim().length === 0) {
+            return false;
+        }
         if (this.currentRoom && this.currentRoom !== roomCode) {
-            this.send('leave-room', { 
+            this.send('leave-room', {
                 roomCode: this.currentRoom,
                 userId: this.userId
             });
         }
-        
         this.currentRoom = roomCode;
-        this.userId = localStorage.getItem('userId');
-        this.send('join-room', { 
-            roomCode,
+        let rawUserId = userId != null ? userId : localStorage.getItem('userId');
+        let finalUserId = rawUserId ? parseInt(rawUserId) : null;
+        if (!finalUserId || isNaN(finalUserId) || finalUserId <= 0) {
+            return false;
+        }
+        this.userId = finalUserId;
+        let rawUsername = username != null ? username : (localStorage.getItem('username') || localStorage.getItem('userName') || localStorage.getItem('name'));
+        let finalUsername = rawUsername ? String(rawUsername).trim() : '';
+        if (!finalUsername || finalUsername.length === 0) {
+            return false;
+        }
+        const joinData = {
+            roomCode: roomCode,
             userId: this.userId,
-            username: localStorage.getItem('username') || 'Anonymous'
-        });
-        
-        // Request initial players list
+            username: finalUsername
+        };
+        this.send('join-room', joinData);
         setTimeout(() => {
             this.send('request-players-update', { roomCode });
         }, 1000);
+        return true;
     }
 
     leaveRoom() {

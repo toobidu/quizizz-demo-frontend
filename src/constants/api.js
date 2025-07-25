@@ -5,7 +5,12 @@
  */
 
 export const API_CONFIG = {
-    BASE_URL: '/api', TIMEOUT: 10000, WEBSOCKET_URL: 'ws://localhost:3001'
+    BASE_URL: '/api', 
+    TIMEOUT: 10000, 
+    // ✅ FIX: Sử dụng /ws prefix để tránh conflict với React routing
+    WEBSOCKET_URL: import.meta.env.DEV 
+        ? 'ws://localhost:5173/ws'    // Development: Proxy qua /ws
+        : 'ws://localhost:3001'       // Production: Kết nối trực tiếp
 };
 
 export const API_ENDPOINTS = {

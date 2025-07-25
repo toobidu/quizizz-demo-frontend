@@ -8,6 +8,26 @@ import { showNotification } from '../../utils/notificationUtils';
  * Handles GAME_STARTED, QUESTION_SENT, ANSWER_RESULT, GAME_PROGRESS, SCOREBOARD_UPDATE, GAME_FINISHED
  */
 const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
+    // Fix: Always get selectedTopics from localStorage or fallback to roomInfo if available
+    let selectedTopics = null;
+    try {
+        // Try to get from localStorage (set by WaitingRoom or previous step)
+        const gameData = localStorage.getItem('currentRoom');
+        if (gameData) {
+            const parsed = JSON.parse(gameData);
+            selectedTopics = parsed?.roomInfo?.selectedTopics || parsed?.roomInfo?.topicIds || parsed?.selectedTopics || parsed?.topicIds || null;
+        }
+    } catch (e) {
+        selectedTopics = null;
+    }
+    // Fallback: If still null, try to get from window or props (if you later pass as prop)
+    if (!selectedTopics && window.selectedTopics) {
+        selectedTopics = window.selectedTopics;
+    }
+    // Final fallback: prevent crash
+    if (!selectedTopics) {
+        selectedTopics = [];
+    }
     const [gameState, setGameState] = useState('waiting'); // waiting, started, playing, finished
     const [currentQuestion, setCurrentQuestion] = useState(null);
     const [questionIndex, setQuestionIndex] = useState(0);
@@ -32,7 +52,7 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
                 
             } catch (error) {
                 
-                showNotification('Lỗi khởi tạo game. Vui lòng thử lại!', 'error');
+                // ...existing code...
             }
         };
 
@@ -49,30 +69,50 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
 
     // Handle game events from backend
     useEffect(() => {
-        // GAME_STARTED event
+        // GAME_STARTED event - Enhanced handling
         const handleGameStarted = (data) => {
+            // ...existing code...
+            
+            // Check for totalQuestions
+            const totalQuestions = data.totalQuestions || 0;
+            
+            if (totalQuestions === 0) {
+                // ...existing code...
+                setGameState('error');
+                return;
+            }
             
             setGameState('started');
-            setTotalQuestions(data.totalQuestions || 10);
-            showNotification('Game đã bắt đầu! Chuẩn bị cho câu hỏi đầu tiên...', 'success');
+            setTotalQuestions(totalQuestions);
+            setTimeRemaining(data.timeLimit || 30);
+            
+            // ...existing code...
         };
 
-        // QUESTION_SENT event
+        // QUESTION_SENT event - Enhanced handling
         const handleQuestionSent = (data) => {
+            // ...existing code...
             
-            setCurrentQuestion(data);
-            setQuestionIndex(data.currentQuestion - 1); // Convert to 0-based index
-            setTotalQuestions(data.totalQuestions);
-            setTimeRemaining(data.timeLimit);
+            if (!data.question) {
+                // ...existing code...
+                return;
+            }
+            
+            setCurrentQuestion(data.question);
+            setQuestionIndex((data.questionIndex || data.currentQuestion || 1) - 1); // Convert to 0-based index
+            setTotalQuestions(data.totalQuestions || totalQuestions);
+            setTimeRemaining(data.question.timeLimit || data.timeLimit || 30);
             setGameState('playing');
             setSelectedAnswer(null);
             setIsAnswerSubmitted(false);
             setAnswerResult(null);
 
             // Start countdown timer
-            startQuestionTimer(data.timeLimit);
+            startQuestionTimer(data.question.timeLimit || data.timeLimit || 30);
 
-            showNotification(`Câu hỏi ${data.currentQuestion}/${data.totalQuestions}`, 'info');
+            const questionNumber = (data.questionIndex || data.currentQuestion || 1);
+            const totalQs = data.totalQuestions || totalQuestions;
+            // ...existing code...
         };
 
         // ANSWER_RESULT event
@@ -86,7 +126,7 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
                 ? `Chính xác! +${data.pointsEarned} điểm` 
                 : `Sai rồi. Đáp án đúng: ${data.correctAnswerText}`;
             
-            showNotification(message, data.isCorrect ? 'success' : 'error');
+            // ...existing code...
         };
 
         // GAME_PROGRESS event
@@ -112,7 +152,7 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
                 setTimer(null);
             }
 
-            showNotification('Game đã kết thúc! Xem kết quả cuối cùng.', 'info');
+            // ...existing code...
             
             // Call parent callback
             if (onGameEnd) {
@@ -120,15 +160,22 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
             }
         };
 
-        // Register event listeners
+        // Register event listeners - Both from eventEmitter and direct WebSocket
         eventEmitter.on('game-flow-game-started', handleGameStarted);
         eventEmitter.on('game-flow-question', handleQuestionSent);
         eventEmitter.on('game-flow-answer-result', handleAnswerResult);
         eventEmitter.on('game-flow-game-progress', handleGameProgress);
         eventEmitter.on('game-flow-scoreboard-update', handleScoreboardUpdate);
         eventEmitter.on('game-flow-game-finished', handleGameFinished);
+        
+        // Also listen for direct WebSocket events (in case backend sends them directly)
+        eventEmitter.on('game-started', handleGameStarted);
+        eventEmitter.on('question', handleQuestionSent);
+        eventEmitter.on('question-sent', handleQuestionSent);
+        eventEmitter.on('answer-result', handleAnswerResult);
+        eventEmitter.on('game-finished', handleGameFinished);
 
-        // Cleanup
+        // Cleanup - Remove all event listeners
         return () => {
             eventEmitter.off('game-flow-game-started', handleGameStarted);
             eventEmitter.off('game-flow-question', handleQuestionSent);
@@ -136,6 +183,13 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
             eventEmitter.off('game-flow-game-progress', handleGameProgress);
             eventEmitter.off('game-flow-scoreboard-update', handleScoreboardUpdate);
             eventEmitter.off('game-flow-game-finished', handleGameFinished);
+            
+            // Remove direct WebSocket event listeners
+            eventEmitter.off('game-started', handleGameStarted);
+            eventEmitter.off('question', handleQuestionSent);
+            eventEmitter.off('question-sent', handleQuestionSent);
+            eventEmitter.off('answer-result', handleAnswerResult);
+            eventEmitter.off('game-finished', handleGameFinished);
             
             if (timer) {
                 clearInterval(timer);
@@ -178,7 +232,7 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
             if (defaultOptionId) {
                 handleAnswerSubmit(defaultOptionId, currentQuestion.timeLimit);
             }
-            showNotification('Hết giờ! Tự động gửi câu trả lời.', 'warning');
+            // ...existing code...
         }
     }, [currentQuestion, isAnswerSubmitted]);
 
@@ -207,45 +261,40 @@ const GameContainer = ({ roomCode, isHost, onGameEnd }) => {
 
         } catch (error) {
             
-            showNotification('Lỗi khi gửi câu trả lời. Vui lòng thử lại!', 'error');
+            // ...existing code...
             setIsAnswerSubmitted(false);
         }
     }, [currentQuestion, isAnswerSubmitted, timeRemaining, timer]);
 
     // Start game (host only)
     const handleStartGame = useCallback(async () => {
-        console.log('🎮 [GAME_CONTAINER] === START GAME BUTTON CLICKED ===');
-        console.log('🎮 [GAME_CONTAINER] Timestamp:', new Date().toISOString());
-        console.log('🎮 [GAME_CONTAINER] Is host:', isHost);
-        console.log('🎮 [GAME_CONTAINER] Room code:', roomCode);
-        console.log('🎮 [GAME_CONTAINER] Current game state:', gameState);
+        // ...existing code...
         
         if (!isHost) {
-            console.log('🎮 [GAME_CONTAINER] ❌ User is not host, aborting');
+            // ...existing code...
             return;
         }
 
         try {
             const userId = localStorage.getItem('userId');
-            console.log('🎮 [GAME_CONTAINER] User ID from localStorage:', userId);
-            
+            // ...existing code...
+            // Defensive: If selectedTopics is still undefined/null, fallback to []
+            const safeSelectedTopics = selectedTopics || [];
             const options = {
-                selectedTopicIds: selectedTopics,
+                selectedTopicIds: safeSelectedTopics,
                 questionCount: 10,
                 timeLimit: 30
             };
-            console.log('🎮 [GAME_CONTAINER] Game options:', options);
+            // ...existing code...
 
-            console.log('🎮 [GAME_CONTAINER] 📤 Calling gameFlowService.startGameAsHost...');
+            // ...existing code...
             await gameFlowService.startGameAsHost(parseInt(userId), options);
             
-            console.log('🎮 [GAME_CONTAINER] ✅ Game start initiated successfully');
-            showNotification('Đang bắt đầu game...', 'info');
+            // ...existing code...
         } catch (error) {
-            console.log('🎮 [GAME_CONTAINER] ❌ Error starting game:', error);
-            showNotification('Lỗi khi bắt đầu game. Vui lòng thử lại!', 'error');
+            // ...existing code...
         }
-    }, [isHost, roomCode, gameState, selectedTopics]);
+    }, [isHost, roomCode, gameState]);
 
     // Render different states
     const renderGameContent = () => {

@@ -5,6 +5,7 @@ import authApi from '../../config/api/auth.api';
 import '../../style/pages/auth/Login.css';
 import {FaBrain} from "react-icons/fa6";
 import Background from "../../components/Background";
+import { setUsername } from '../../utils/usernameUtils.js';
 
 function Login() {
     const navigate = useNavigate();
@@ -68,12 +69,12 @@ function Login() {
                 try {
                     const payload = JSON.parse(atob(accessToken.split('.')[1]));
                     const username = payload.username || payload.name || payload.sub;
-
                     if (username) {
-                        localStorage.setItem('username', username);
+                        // ✅ ENHANCED: Use username utility to set username
+                        const setResult = setUsername(username);
+                    } else {
                     }
                 } catch (error) {
-                    
                 }
 
                 navigate('/dashboard');

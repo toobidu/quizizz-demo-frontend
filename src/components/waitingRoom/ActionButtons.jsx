@@ -4,23 +4,23 @@ import PropTypes from 'prop-types';
 import '../../style/pages/room/waitingRoom/ActionButtons.css';
 
 /**
- * Component hiển thị các nút hành động trong phòng chờ - Optimized with React.memo
+ * Component hiển thị các nút hành động trong phòng chờ - No setTimeout fallback
  * - Host: Có nút bắt đầu và rời phòng
  * - Player: Chỉ có nút rời phòng (mặc định đã sẵn sàng khi vào phòng)
+ * - Chỉ dựa vào WebSocket events để chuyển trang
  */
 const ActionButtons = React.memo(({
-    isHost, players, canStartGame, onStartGame, onLeaveRoom
+    isHost, players, canStartGame, onStartGame, onLeaveRoom, isStarting = false
 }) => {
-    // Sử dụng canStartGame từ props thay vì tính toán lại
-    const startButtonText = canStartGame ? 'Bắt đầu trò chơi' : 'Chờ người chơi tham gia';
+    // ...existing code...
+    // Dynamic button text based on state
+    const startButtonText = useMemo(() => {
+        if (isStarting) return 'Đang bắt đầu...';
+        return canStartGame ? 'Bắt đầu trò chơi' : 'Chờ người chơi tham gia';
+    }, [canStartGame, isStarting]);
 
     const handleStartClick = () => {
-        console.log('🎮 [ACTION_BUTTONS] === START BUTTON CLICKED ===');
-        console.log('🎮 [ACTION_BUTTONS] Timestamp:', new Date().toISOString());
-        console.log('🎮 [ACTION_BUTTONS] Is host:', isHost);
-        console.log('🎮 [ACTION_BUTTONS] Can start game:', canStartGame);
-        console.log('🎮 [ACTION_BUTTONS] Players:', players);
-        console.log('🎮 [ACTION_BUTTONS] Calling onStartGame...');
+        if (isStarting) return; // Prevent multiple clicks
         onStartGame();
     };
 
@@ -29,9 +29,9 @@ const ActionButtons = React.memo(({
             {/* Chỉ hiển thị nút bắt đầu khi người dùng thực sự là host */}
             {isHost && (
                 <button
-                    className={`btn-start ${canStartGame ? 'enabled' : 'disabled'}`}
+                    className={`btn-start ${canStartGame && !isStarting ? 'enabled' : 'disabled'} ${isStarting ? 'loading' : ''}`}
                     onClick={handleStartClick}
-                    disabled={!canStartGame}
+                    disabled={!canStartGame || isStarting}
                 >
                     <FiPlay className="btn-icon"/>
                     {startButtonText}
@@ -39,7 +39,7 @@ const ActionButtons = React.memo(({
             )}
 
             {/* Nút rời phòng cho tất cả */}
-            <button className="btn-leave" onClick={onLeaveRoom}>
+            <button className="btn-leave" onClick={onLeaveRoom} disabled={isStarting}>
                 <FiLogOut className="btn-icon"/>
                 Rời phòng
             </button>
@@ -54,7 +54,8 @@ ActionButtons.propTypes = {
     players: PropTypes.array.isRequired,
     canStartGame: PropTypes.bool.isRequired,
     onStartGame: PropTypes.func.isRequired,
-    onLeaveRoom: PropTypes.func.isRequired
+    onLeaveRoom: PropTypes.func.isRequired,
+    isStarting: PropTypes.bool // New prop for starting state
 };
 
 export default ActionButtons;

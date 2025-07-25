@@ -4,30 +4,13 @@ import Header from './Header';
 import Footer from './Footer';
 import ModalContainer from './ModalContainer';
 import '../style/layouts/MainLayout.css';
+import { ensureUsername } from '../utils/usernameUtils.js';
 
 function MainLayout({children}) {
     const navigate = useNavigate();
 
-    const userName = localStorage.getItem('username');
-
-    // Nếu không có username, thử lấy từ token
-    let finalUserName = userName;
-    if (!finalUserName) {
-        try {
-            const token = localStorage.getItem('accessToken');
-            if (token) {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                finalUserName = payload.username || payload.name || payload.username || payload.Name;
-
-                // Lưu lại vào localStorage để lần sau không cần decode token
-                if (finalUserName) {
-                    localStorage.setItem('username', finalUserName);
-                }
-            }
-        } catch (error) {
-            
-        }
-    }
+    // ✅ ENHANCED: Use username utility for guaranteed username
+    const finalUserName = ensureUsername();
 
     const handleLogout = () => {
         localStorage.removeItem('accessToken');
@@ -37,7 +20,7 @@ function MainLayout({children}) {
     };
 
     return (<div className="main-layout">
-        <Header userName={finalUserName || 'User'} handleLogout={handleLogout}/>
+        <Header userName={finalUserName} handleLogout={handleLogout}/>
         <main className="main-content">
             {children}
         </main>

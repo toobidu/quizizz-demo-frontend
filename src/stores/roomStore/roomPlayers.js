@@ -32,6 +32,7 @@ const roomPlayers = (set, get) => ({
                         );
 
 
+
                         const playersData = playersResponse.data || [];
 
                         // ✅ FIXED: Normalize players data với logic xác định host đúng
@@ -57,6 +58,7 @@ const roomPlayers = (set, get) => ({
                         });
                         
                         // ✅ FIXED: Set state với logic đúng
+                        
                         set({
                             currentRoom: roomInfo,
                             players: normalizedPlayers,

@@ -15,10 +15,11 @@ export const useUnifiedWebSocket = (options = {}) => {
         onError = null 
     } = options;
 
-    // Stable state
+    // Stable state với room join tracking
     const [connectionState, setConnectionState] = useState({
         isConnected: unifiedWebSocketService.isConnected,
         isConnecting: unifiedWebSocketService.isConnecting,
+        roomJoined: false, // ✅ Track room join status
         error: null
     });
 
@@ -95,6 +96,8 @@ export const useUnifiedWebSocket = (options = {}) => {
     useEffect(() => {
         
         const handleConnect = (data) => {
+            console.log('🔌 [WS_HOOK] === WEBSOCKET CONNECTED ===');
+            console.log('🔌 [WS_HOOK] Connection data:', data);
             updateConnectionState();
             if (callbacksRef.current.onConnect) {
                 callbacksRef.current.onConnect(data);
@@ -102,23 +105,61 @@ export const useUnifiedWebSocket = (options = {}) => {
         };
 
         const handleDisconnect = (data) => {
+            console.log('🔌 [WS_HOOK] === WEBSOCKET DISCONNECTED ===');
+            console.log('🔌 [WS_HOOK] Disconnect data:', data);
+            console.log('🔌 [WS_HOOK] Resetting roomJoined to false');
             updateConnectionState();
             hasJoinedRef.current = false;
+            // ✅ CRITICAL: Reset roomJoined when WebSocket disconnects
+            setConnectionState(prev => ({ 
+                ...prev, 
+                roomJoined: false,
+                isConnected: false 
+            }));
             if (callbacksRef.current.onDisconnect) {
                 callbacksRef.current.onDisconnect(data);
             }
         };
 
         const handleError = (error) => {
+            console.log('🔌 [WS_HOOK] === WEBSOCKET ERROR ===');
+            console.log('🔌 [WS_HOOK] Error:', error);
             setConnectionState(prev => ({ ...prev, error }));
             if (callbacksRef.current.onError) {
                 callbacksRef.current.onError(error);
             }
         };
 
+        // ✅ NEW: Handle room connection success
+        const handleRoomConnectionSuccess = (data) => {
+            console.log('🏠 [WS_HOOK] === ROOM CONNECTION SUCCESS ===');
+            console.log('🏠 [WS_HOOK] Room connection data:', data);
+            console.log('🏠 [WS_HOOK] Setting roomJoined to true');
+            hasJoinedRef.current = true;
+            setConnectionState(prev => ({ 
+                ...prev, 
+                roomJoined: true 
+            }));
+        };
+
+        // ✅ NEW: Handle room connection failed
+        const handleRoomConnectionFailed = (data) => {
+            console.log('🏠 [WS_HOOK] === ROOM CONNECTION FAILED ===');
+            console.log('🏠 [WS_HOOK] Room connection error:', data);
+            console.log('🏠 [WS_HOOK] Setting roomJoined to false');
+            hasJoinedRef.current = false;
+            setConnectionState(prev => ({ 
+                ...prev, 
+                roomJoined: false 
+            }));
+        };
+
         unifiedWebSocketService.on('connected', handleConnect);
         unifiedWebSocketService.on('disconnected', handleDisconnect);
         unifiedWebSocketService.on('error', handleError);
+        // ✅ NEW: Listen for room connection events
+        unifiedWebSocketService.on('room-connection-success', handleRoomConnectionSuccess);
+        unifiedWebSocketService.on('room-connection-failed', handleRoomConnectionFailed);
 
         // Initial state sync
         updateConnectionState();
@@ -127,6 +168,8 @@ export const useUnifiedWebSocket = (options = {}) => {
             unifiedWebSocketService.off('connected', handleConnect);
             unifiedWebSocketService.off('disconnected', handleDisconnect);
             unifiedWebSocketService.off('error', handleError);
+            unifiedWebSocketService.off('room-connection-success', handleRoomConnectionSuccess);
+            unifiedWebSocketService.off('room-connection-failed', handleRoomConnectionFailed);
         };
     }, [updateConnectionState]);
 
@@ -156,6 +199,7 @@ export const useUnifiedWebSocket = (options = {}) => {
     return {
         isConnected: connectionState.isConnected,
         isConnecting: connectionState.isConnecting,
+        roomJoined: connectionState.roomJoined, // ✅ NEW: Expose room joined status
         error: connectionState.error,
         connect,
         disconnect,

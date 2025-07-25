@@ -25,39 +25,40 @@ const GamePage = () => {
         const initializeGame = async () => {
             try {
                 if (!roomCode) {
-                    
-                    navigate('/dashboard');
+                    navigate('/rooms');
                     return;
                 }
 
                 const currentUserId = localStorage.getItem('userId');
                 if (!currentUserId) {
-                    
-                    navigate('/dashboard');
+                    navigate('/rooms');
                     return;
                 }
 
                 // Get current room info to determine if user is host
-                const roomData = JSON.parse(localStorage.getItem('currentRoom'));
-
-                if (!roomData) {
-                    
-                    navigate('/dashboard');
+                const roomData = JSON.parse(localStorage.getItem('currentRoom') || '{}');
+                const gameStarted = localStorage.getItem('gameStarted');
+                if (!roomData.roomCode) {
+                    navigate('/rooms');
                     return;
                 }
                 
                 if (roomData.roomCode !== roomCode) {
-                    
-                    navigate('/dashboard');
+                    navigate('/rooms');
+                    return;
+                }
+
+                // Check if game was started
+                if (gameStarted !== 'true' && gameStarted !== 'pending') {
+                    showNotification('Game chưa được bắt đầu', 'warning');
+                    navigate(`/waiting-room/${roomCode}`);
                     return;
                 }
 
                 const userIsHost = roomData.hostId === currentUserId || roomData.isHost === true;
                 setIsHost(userIsHost);
-
                 setLoading(false);
             } catch (error) {
-                
                 setError('Không thể khởi tạo game. Vui lòng thử lại.');
                 setLoading(false);
             }
@@ -68,7 +69,9 @@ const GamePage = () => {
 
     // Handle game end
     const handleGameEnd = (gameData) => {
-
+        // Clean up localStorage
+        localStorage.removeItem('gameStarted');
+        
         // Show final notification
         showNotification('Game completed! Check your results.', 'success');
         
